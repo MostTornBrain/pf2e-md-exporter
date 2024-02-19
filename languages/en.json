@@ -1,5 +1,5 @@
 {
-    "export-markdown": {
+    "pf2e-md-exporter": {
         "exportToMarkdown": "Export to Markdown",
         "exportToMarkdownTooltip": "Export the contents to Markdown notes",
         "ProgressNotification": "Generating Markdown ZIP file",

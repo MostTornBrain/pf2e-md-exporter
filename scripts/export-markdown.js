@@ -6,7 +6,7 @@ import replaceAsync from "./lib/string-replace-async.js";
 import * as MOD_CONFIG from "./config.js";
 import { myRenderTemplate, clearTemplateCache } from "./render-template.js"
 
-const MODULE_NAME = "export-markdown";
+const MODULE_NAME = "pf2e-md-exporter";
 const FRONTMATTER = "---\n";
 const EOL = "\n";
 const MARKER = "```";
