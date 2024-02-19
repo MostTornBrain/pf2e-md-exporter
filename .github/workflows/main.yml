@@ -119,6 +119,7 @@ jobs:
             module.json                          \
             README.md                            \
             LICENSE                              \
+            handlebars/                          \
             templates                            \
             scripts/                             \
             styles/                              \

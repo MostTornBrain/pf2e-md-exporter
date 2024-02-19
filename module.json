@@ -1,7 +1,7 @@
 {
-  "id": "export-markdown",
-  "title": "Markdown Exporter",
-  "description": "Exports one or more journals as a ZIP file containing markdown files in a folder tree",
+  "id": "pf2e-md-exporter",
+  "title": "PF2E Exporter",
+  "description": "Exports one or more journals as a ZIP file containing markdown files in a folder tree. This is specifically tuned for working with PF2E formatted data.",
   "version": "#{VERSION}#",
   "library": "false",
   "compatibility": {
@@ -10,13 +10,8 @@
   },
   "authors": [
 		{
-			"name": "Farling",
-			"url": "https://github.com/farling42",
-			"email": "foundryvtt@amusingtime.uk",
-			"discord": "farling",
-			"ko-fi": "farling",
-			"patreon": "amusingtime",
-			"twitter": "@shambles42"
+			"name": "MostTornBrain",
+			"url": "https://github.com/MostTornBrain"
 		}
   ],
   "relationships": {

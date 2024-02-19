@@ -1,75 +1,88 @@
-[![ko-fi](https://img.shields.io/badge/Ko--Fi-farling-success)](https://ko-fi.com/farling)
-[![patreon](https://img.shields.io/badge/Patreon-amusingtime-success)](https://patreon.com/amusingtime)
-[![paypal](https://img.shields.io/badge/Paypal-farling-success)](https://paypal.me/farling)
-![GitHub License](https://img.shields.io/github/license/farling42/fvtt-export-markdown)
-![Foundry Info](https://img.shields.io/badge/Foundry-v10-informational)
-![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/fvtt-export-markdown/latest/module.zip)
-![Forge installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Ffvtt-export-markdown)
 
-# Markdown Exporter
+# Markdown Exporter, changes for PF2E
 
-Selecting the "Export to Markdown" option from the Journal Sidebar generates a ZIP file containing the selected journal/folder tree.
+# Process Overview
 
-It is possible to export:
+**NOTE** This is a modification of the [Markdown Exporter](https://github.com/farling42/fvtt-export-markdown) module so it produces more usable Pathfinder 2E Remaster content in markdown format for Obisidian.
 
-- one individual journal
-- a folder of journals
-- the entire sidebar of journals
-- the contents of a Journal compendium
-- the contents of Journal compendiums in a compendium folder
+Detailed instructions are in the next section.  What follows here is a quick overview of the process:
 
-The contents of the downloaded ZIP can then be exported into your Obsidian Vault.
+First, install this module in your Foundry world.
 
-Links to non-journal entries will be converted to Markdown-format links (which will obviously point to non-existent pages).
+When exporting the Pathfinder compendium, use the included `handlebars/spell_handlebar.hbs` for Spells, `monster_handlebar.hbs` as the general handlebar for Actors, `hazard_handlebar.hbs` as the handlebar for Hazard actors, and `generic_handlebar.hbs` for generic items.  These handlebars will already be selected by default, but you can override them in the settings if you have your own custom handlebars.
 
-## Options
+Included in this project is a new file `pf2e-spell.css` which is an 
+Obsidian CSS snippet which can be installed in your `.obsidian/snippets` directory so the spells resemble the new style used in the Player Core and GM Core books.
 
-### Format for non-decoded data
+# Detailed Installation Instructions
 
-You can select either YAML or JSON for notes created from Actors and Items, to specify the format in which the data should be displayed within the note.
+This process requires you have a Foundry account with a World with the **Pathfinder Second Edition** package selected as the Game System.
+![Game System](Screenshots/GameSystem.png)
 
-### Format Scenes for Leaflet plugin
+## 1. Install the following required modules:
+* libWrapper
+* PF2E Exporter
+* More Handlebars Helpers
 
-All scenes will be converted to use the syntax required for Obsidian's "Leaflet" plugin.
+## 2. Enable modules
+Launch your world in Foundry, and log in as the Gamemaster account.   If you already had your world running when you performed the above steps, you will need to log out and log back in as Gamemaster for the changes to take effect.
 
-### JournalEntry folders use UUID instead of Journal name
+Choose `Manage Modules` in your logged into Foundry world.  Enable these three modules you installed in step 1. 
+![Required Modules](Screenshots/RequiredModules.png)
 
-When not checked, folders will use the journal entry's name; when checked, folders will use the journal entry's UUID.
+## 3. Configure Markdown Exporter
+Choose `Configure Settings` and pick Markdown Exporter. Ensure the following options are checked.   _NOTE:_ It is recommended to **NOT** use the UUID of each document as the note name as doing so will populate your vault with a lot of random file names.
+![Markdown Exporter](Screenshots/MarkdownExporterSettings.png)
 
-(Note that Obsidian's "AidenLX's Folder Note" plugin will show the journal's title in the note explorer.)
+Click on `Save Changes`.
 
-*Using UUID allows for easier (and more unique) linking of links between documents.*
+## 4. Export the Compendium
+You are now ready to export any items from your world, including Pathfinder Compendium items.  If you want to do a quick test, choose to view a monster or spell, then choose to "import" it into your saved items.   Then, right click on that item and choose the last option in the pop-up menu named `Export to Markdown`. If everything is installed correctly, you should see a pop-up message saying it is exporting the data and then a file will be saved named after the item. If the file has multiple items associated with it will be created as a `.zip` file.
 
-### Use UUID of each document as the Note name
+If you want to export the whole Compendium, you can go to the compendium menu and at the bottom of the screen choose `Export to Markdown`.  This will take several minutes.  If you'd like to see progress as you wait, you can open the browser debug window and the console will show messages of the items it is exporting.
 
-With this option checked, all documents will be stored in a file whose name is Foundry's UUID. (Obsidian's "Front Matter Title" plugin will show the document's title in Obsidian's note explorer panel)
+![Compendium](Screenshots/Compendium.png)
 
-With this option unchecked, all documents will be stored in a file whose name is the Document's name.
+## 6. Customize your Vault
+The exported data requires a few extra plugins in Obsidian to be viewed in the best format.
+### Install and enable the following plugins. 
+* Fantasy Statblocks
+* Pathfinder 2E Action Icons
 
-*Using UUID allows for easier (and more unique) linking of links between documents.*
+For the Fantasy Statblocks, you can go into its settings and disable the built-in D&D 5e SRD monsters if you aren't using D&D.
 
-## Installation
+![FantasyStatblocks](Screenshots/FantasyStatblocksPlugin.png)
 
-The module can be installed directly from your Foundry server's module management page.
+### Install ITS
+It is also recommended to install the ITS Theme so the spells look their best. Choose Obsidian Settings, `Appearance` and in the `Themes` section pick manage, search for ITS and install and use it.
 
-Alternatively, you can install manually using the link:
+![ITS](Screenshots/InstallITS.png)
 
-https://github.com/farling42/fvtt-export-markdown/releases/latest/download/module.json
+### Install custom snippet
+In addition, copy the `pf2e-spell.css` from this github project into your `.obsidian/snippets` folder.  (If you don't already have a snippets folder, you will need to create it.)   After you copy the snippet file, go into the Obsidian settings, choose `Appearance` and scroll down to the `Snippets` section and enable this `pf2e-spell.css` snippet.
 
-## Dependencies
+![Snippet](Screenshots/EnableSnippet.png)
 
-This library requires the libWrapper module in order to work properly.
+### Unzip the exported Compendium and add it to your vault.
+You can install the compendium in any sub-folder in your vault.  The links it uses between items only reference the direct unique filenames without paths, so you should be able to even re-organize the directories however you might prefer.
 
-## Plugins for use with Obsidian.md
+### Reload Obsisian for plugin and CSS changes to take effect
+At this point, it is recommended to reload Obsidian to ensure all the plugins and theme changes take effect, although it may not be 100% necessary in all cases.
+![Reload](Screenshots/ReloadApp.png)
 
-- "Front Matter Title" - To have document names appearing in Obsidian's Explorer (left sidebar). The only Feature which needs to be enabled is "Explorer".
-- "AidenLX's Folder Note" and "Folder Note Core" - So that journal entries have their main contents page accessible directly from the containing folder.
-- "Obsidian Leaflet" - For display of scenes with notes.
+## Enjoy!
+At this point, you should have a vault with the compendium fully linked files.  Monsters should look like this:
 
-## Libraries
+![GoblinPyro](Screenshots/GoblinPyro.png)
 
-- [JSZip](https://stuk.github.io/jszip)
-- [JSYAML](https://github.com/nodeca/js-yaml) (for Object to YAML conversion)
-- [turndown](https://www.npmjs.com/package/turndown) (for HTML to Markdown conversion) 
-- [turndown-plugin-gfm](https://www.npmjs.com/package/turndown-plugin-gfm) (to convert HTML tables to GFM format) 
-- [string-replace-async](https://github.com/dsblv/string-replace-async) (to provide async version of String.replaceAll)
+And spells should look like this:
+
+![Aberrant Form](Screenshots/AberrantForm.png)
+
+# TODO
+
+## Currently in process:
+* spot checking the data for Spells, Monsters, and Hazards comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
+
+## Future:
+Convert the rest of the document types, such as Glossary, Actions, equipment (to include cost, weight, etc.).

@@ -1,0 +1,67 @@
+{{! This handlebar is designed to convert Spells exported from Foundry.  It relies on two modules, PF2E Exporter and More Handlebars Helpers.}}
+---
+obsidianUIMode: preview
+title: "{{{name}}}"
+noteType: pf2eSpell
+cssclasses: pf2e,pf2e-spell
+tags:
+  - spell/level/{{system.level.value}}
+  {{#each system.traits.value}}
+  - trait/{{this}}
+   {{/each}}
+  - trait/{{system.traits.rarity}}
+{{#if system.ritual}}
+  - ritual
+{{/if~}}
+{{#if system.publication.remaster}}
+  - remaster
+{{/if~}}
+aliases: "{{{uuid}}}" 
+---
+# {{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}  
+## {{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}
+### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
+{{~#each system.traits.value}}
+[[{{this}}]]{{/each}}
+{{#if system.traits.traditions}}**Traditions** {{#each system.traits.traditions}}[[{{this}}]]{{ifThen @last "" ", "}}{{/each}}{{/if}}
+{{#unless actionGlyph}}**Cast** {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/unless}}
+{{~#if system.ritual.secondary.casters~}}
+; **Secondary Casters** {{system.ritual.secondary.casters}}
+{{/if~}}
+
+{{#if system.cost.value~}}
+**Cost** {{{system.cost.value}}}
+{{/if~}}
+
+{{#if system.ritual.primary.check~}}
+**Primary Check** {{system.ritual.primary.check}}
+{{/if~}}
+
+{{#if system.ritual.secondary.checks~}}
+**Secondary Checks** {{system.ritual.secondary.checks}}
+{{/if~}}
+
+{{#if system.range.value~}}
+**Range** {{system.range.value}}
+{{/if~}}
+
+{{#if system.area~}}
+**Area** {{system.area.value}}-foot {{system.area.type}}
+{{/if~}}
+
+{{#if system.target.value~}}
+**Targets** {{system.target.value}}
+{{/if~}}
+
+{{#if system.defense.save}}
+**Saving Throw** {{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}
+{{/if~}}
+
+{{#if system.duration.value}}
+**Duration** {{system.duration.value}}
+{{/if}}
+* * * 
+{{{me-HTMLtoMarkdown system.description.value this}}}
+
+*Source: {{{system.publication.title}}}*
+*{{system.publication.license}}*

@@ -1,0 +1,32 @@
+{{! This handlebar is designed to convert generic items or notes.  It relies on two modules, PF2E Exporter and More Handlebars Helpers.}}
+---
+obsidianUIMode: preview
+title: "{{{name}}}"
+cssclasses: pf2e,{{#if (eq type "feat")}}pf2e-spell{{else}}pf2e-action{{/if}}
+tags:
+  {{#each system.traits.value}}
+  - trait/{{this}}
+   {{/each}}
+  - trait/{{system.traits.rarity}}
+{{#if system.category}}
+  - category/{{{system.category}}}
+{{/if~}}
+{{#if system.publication.remaster}}
+  - remaster
+{{/if~}}
+aliases: "{{uuid}}"
+license: {{system.publication.license}}
+---
+# {{{name}}}{{#if (and system.actionType.value (and (ne system.actionType.value "action") (ne system.actionType.value "passive")))}} {{{more-handlebars-helpers-table system.actionType.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
+{{~#if (eq system.actionType.value "action")}} {{{more-handlebars-helpers-table system.actions.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
+{{#if (eq type "feat")}}## Feat {{system.level.value}}{{/if}}
+### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
+{{~#each system.traits.value}}
+[[{{this}}]]{{/each}}
+{{#if system.category}}**Category** {{{system.category}}}{{/if}}
+{{#if system.prerequisites.value}}**Prerequisites** {{#each system.prerequisites.value}}{{{this.value}}}{{ifThen @last "" "; "}}{{/each}}
+* * *{{/if}}
+{{{me-HTMLtoMarkdown system.description.value this}}}
+
+*Source: {{{system.publication.title}}}*
+*{{system.publication.license}}*

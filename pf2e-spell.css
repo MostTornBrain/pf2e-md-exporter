@@ -1,0 +1,159 @@
+
+.pf2e .metadata-container {
+  visibility: hidden;
+  content: hidden;
+  height: 0!important;
+  margin: 0!important;
+}
+
+.pf2e {
+    background-color: rgb(246,244,242);
+}
+
+.pf2e-spell h1 {
+    font-size: 1.3em;
+    font-weight: 700;
+    line-height: 1.5em;
+    text-transform: uppercase;
+    color: rgb(51,51,51);
+    font-family: system-ui, "Pathfinder";
+    background-color: rgb(246,244,242);
+    float: left;
+    display: inline-block;
+    margin: 0;
+}
+
+.pf2e-spell h2 {
+    font-size: 1.3em;
+    font-weight: 700;
+    line-height: 1.56em;
+    text-transform: uppercase;
+    color: rgb(51,51,51);
+    font-family: system-ui, "Pathfinder";
+    background-color: rgb(246,244,242);
+    text-align: right;
+    width: 50%;
+    display: inline-block;
+}
+
+.pf2e-spell h2::after {
+  clear: both;
+  display: block;
+  border: none;
+  width: 100%;
+}
+
+.pf2e-spell h1::after {
+  clear: both;
+  display: block;
+  border: none;
+}
+
+.pf2e h3 {
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.33em;
+    text-transform: uppercase;
+    color: #fff!important;
+    font-family: system-ui, "Pathfinder";
+    background-color: rgb(246,244,242);
+    text-align: left;
+    margin: 0;
+}
+
+.pf2e h3 a {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    text-transform: uppercase;
+    color: inherit;
+    font-family: inherit;
+    background-color: inherit;
+    
+    background: rgb(97, 20, 5);
+    border-color: #d9c484;
+    background-clip: border-box;
+    border-style: solid;
+    color: rgb(232, 232, 232) !important;
+    cursor: help;
+    font-weight: 700;
+    padding: 0.1rem;
+    margin: 0.0;
+    text-align: center;
+    text-indent: 0;
+    word-break: keep-all;
+    font-style: normal;
+    display: inline-block;
+    border-width: 0.2rem;
+    
+    pointer-events:none;
+}
+
+.pf2e h3 a.internal-link[title="Uncommon Rarity Trait"] {
+    background: rgb(152, 81, 61);
+    border-color: #d9c484;
+    background-clip: border-box;
+    border-style: solid;
+    color: rgb(232, 232, 232) !important;
+    cursor: help;
+    font-weight: 700;
+    padding: 0.1rem;
+    margin: 0.0;
+    text-align: center;
+    text-indent: 0;
+    word-break: keep-all;
+    font-style: normal;
+    display: inline-block;
+    border-width: 0.2rem;
+}
+
+.pf2e-spell h3:after {
+  content: none; /* Remove the generated content */
+  border: none;  /* Remove any borders */
+  height: 0;     /* Remove any height */
+}
+
+.pf2e-spell p {
+  margin-top: 3px;
+  margin-bottom: 1;
+  line-height: 1.2;
+}
+
+
+.pf2e-action h1 {
+  font-size: 1.3em;
+  font-weight: 700;
+  line-height: 1.5em;
+  text-transform: uppercase;
+  color: rgb(51,51,51);
+  font-family: system-ui, "Pathfinder";
+  background-color: rgb(246,244,242);
+  margin: 0;
+}
+
+.pf2e hr {
+  margin: 0!important;
+  height: 0.5em;
+}
+
+/* Remove the fancy hr image - just display a simple line */
+.pf2e hr::after {
+  content: none!important; /* Remove the generated content */
+  border: none!important;  /* Remove any borders */
+  height: 0!important;     /* Remove any height */
+}
+
+.hideProperties .metadata-container {
+  visibility: hidden;
+  content: hidden;
+  height: 0!important;
+  margin: 0!important;
+}
+
+.hideProperties .metadata-content {
+  visibility: hidden;
+  content: hidden;
+  display: none;
+  height: 0!important;
+  margin: 0!important;
+}
