@@ -33,7 +33,7 @@ Hooks.once('ready', () => {
 		hint: "When checked, Journals will be placed into a folder based on the UUID of the JournalEntry (if unchecked, the folder will be the Journal's name, but links to that journal will not work)",
 		scope: "world",
 		type:  Boolean,
-		default: true,
+		default: false,
 		config: true,
 	});
 
@@ -42,7 +42,7 @@ Hooks.once('ready', () => {
 		hint: "When checked, the created notes will have a name that matches the UUID of the document allowing for easy unique linking from other documents (when unchecked, the notes will use the name of the document, which might not be unique for linking purposes)",
 		scope: "world",
 		type:  Boolean,
-		default: true,
+		default: false,
 		config: true,
 	});
 
@@ -52,7 +52,7 @@ Hooks.once('ready', () => {
         hint: "Choose a handlebars template file to be used if a template isn't specified for a specific type of actor",
         scope: "world",
         type:  String,
-        default: "",
+        default: "modules/pf2e-md-exporter/handlebars/monster_handlebar.hbs",
         config: true,
         filePicker: "text"
     })
@@ -60,12 +60,16 @@ Hooks.once('ready', () => {
     for (const type of game.template.Actor.types) {
         const label = CONFIG.Actor.typeLabels[type];
         const actorname = game.i18n.has(label) ? game.i18n.localize(label) : type;
+        let handlebarDefault = "";
+        if (label == 'TYPES.Actor.hazard') {
+          handlebarDefault = "modules/pf2e-md-exporter/handlebars/hazard_handlebar.hbs";
+        }
         game.settings.register(MOD_CONFIG.MODULE_NAME, `template.Actor.${type}`, {
             name: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.actorTemplate.Name`, {name: actorname}),
             hint: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.actorTemplate.Hint`, {name: actorname}),
             scope: "world",
             type:  String,
-            default: "",
+            default: handlebarDefault,
             config: true,
             filePicker: "text"
         })
@@ -77,7 +81,7 @@ Hooks.once('ready', () => {
         hint: "Choose a handlebars template file to be used if a template isn't specified for a specific type of Item",
         scope: "world",
         type:  String,
-        default: "",
+        default: "modules/pf2e-md-exporter/handlebars/generic_handlebar.hbs",
         config: true,
         filePicker: "text"
     })
@@ -85,12 +89,16 @@ Hooks.once('ready', () => {
     for (const type of game.template.Item.types) {
         const label = CONFIG.Item.typeLabels[type];
         const itemname = game.i18n.has(label) ? game.i18n.localize(label) : type;
+        let handlebarDefault = "";
+        if (label == 'TYPES.Item.spell') {
+          handlebarDefault = "modules/pf2e-md-exporter/handlebars/spell_handlebar.hbs";
+        }
         game.settings.register(MOD_CONFIG.MODULE_NAME, `template.Item.${type}`, {
 		    name: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.itemTemplate.Name`, {name: itemname}),
 		    hint: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.itemTemplate.Hint`, {name: itemname}),
 		    scope: "world",
 		    type:  String,
-		    default: "",
+		    default: handlebarDefault,
             config: true,
             filePicker: "text"
         })

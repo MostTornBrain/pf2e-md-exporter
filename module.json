@@ -19,7 +19,12 @@
 			{
 				"id": "lib-wrapper",
 				"manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json"
+			},
+      {
+				"id": "more-handlebars-helpers",
+				"manifest": "https://github.com/kgar/foundry-vtt-more-handlebars-helpers/releases/latest/download/module.json"
 			}
+
     ]
   },
   "esmodules": [
