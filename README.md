@@ -4,7 +4,7 @@
 > [!CAUTION] 
 > This is a modification of the [Markdown Exporter](https://github.com/farling42/fvtt-export-markdown) module.   It was modified so it produces more usable Pathfinder 2E Remaster content in markdown format for Obisidian.  Since it is a derivative of the Markdown Exporter module, it is important to know you should not have both modules active at the same time in a single world.  They both modify menus in the same way, so will very likely cause confusing behavior.
 
-This module relies on [handlebars]() to do the data conversion to markdown format.  When exporting the Pathfinder data, the module will use the included `handlebars/spell_handlebar.hbs` for Spells, `monster_handlebar.hbs` as the general handlebar for Actors, `hazard_handlebar.hbs` as the handlebar for Hazard actors, and `generic_handlebar.hbs` for generic items.  These handlebars will already be selected by default in the module settings, but you can override them if you have your own custom handlebars.
+This module relies on [handlebars](https://handlebarsjs.com) to do the data conversion to markdown format.  When exporting the Pathfinder data, the module will use the included `handlebars/spell_handlebar.hbs` for Spells, `monster_handlebar.hbs` as the general handlebar for Actors, `hazard_handlebar.hbs` as the handlebar for Hazard actors, and `generic_handlebar.hbs` for generic items.  These handlebars will already be selected by default in the module settings, but you can override them if you have your own custom handlebars.
 
 Also included in this project is a `pf2e-spell.css` which is an 
 Obsidian CSS snippet which can be installed in your `.obsidian/snippets` directory so the spells resemble the new style used in the Player Core and GM Core books.
