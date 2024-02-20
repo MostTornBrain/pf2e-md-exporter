@@ -92,6 +92,8 @@ Hooks.once('ready', () => {
         let handlebarDefault = "";
         if (label == 'TYPES.Item.spell') {
           handlebarDefault = "modules/pf2e-md-exporter/handlebars/spell_handlebar.hbs";
+        } else if (label == 'TYPES.Item.weapon') {
+          handlebarDefault = "modules/pf2e-md-exporter/handlebars/weapon_handlebar.hbs";
         }
         game.settings.register(MOD_CONFIG.MODULE_NAME, `template.Item.${type}`, {
 		    name: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.itemTemplate.Name`, {name: itemname}),
