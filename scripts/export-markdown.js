@@ -194,7 +194,7 @@ function convertLinks(markdown, relativeTo) {
 
         let linkdoc;
         try {
-            linkdoc = fromUuidSync(target, {relative: relativeTo});
+            linkdoc = fromUuidSync(target);
             if (!label && !hash) label = doc.name;
         } catch (error) {
             console.debug(`Unable to fetch label from Compendium for ${target}`, error)
@@ -215,6 +215,20 @@ function convertLinks(markdown, relativeTo) {
                 result += `#${toc[hash].text}`;
                 if (!label) label = toc[hash].text;
             }
+        }
+
+        // Append a 1 to the condition since the filename will have a 1 appended to it.
+        if (SPECIAL_CONDITIONS.includes(result)) {
+            result = `${result} 1`;
+        }
+
+        if (linkdoc) {
+            // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+            let pack = game.packs.get(linkdoc.pack);
+            if (pack) {
+                result = `${pack.title}/${result}`;
+            }
+            //console.log("pack:", pack);
         }
 
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
