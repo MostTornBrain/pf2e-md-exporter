@@ -362,17 +362,20 @@ export function convertHtml(doc, html) {
             // Match the default format used by the PF2E Action Icons plugin
             switch (content) {
              // Free action
-             case'F':
+             case 'F':
+             case 'f':
                 content = '0';
                 break;
                 
              // Reaction
              case 'R':
+             case 'r':
                 content = 'r';
                 break;
                 
              // Action - some Foundry entries use 1 (such as most spells), others use 'a'
              case 'a':
+             case 'A':
                 content = '1';
                 break;
             }

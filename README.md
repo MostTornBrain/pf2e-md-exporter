@@ -84,7 +84,7 @@ And spells should look like this:
 # TODO
 
 ## Currently in process:
-* spot checking the data for Spells, Monsters, and Hazards comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
+* spot checking the data for Spells, Monsters, Hazards, ACtions, Feats, and Weapons comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
 
 ## Future:
-Convert the rest of the document types, such as Glossary, Actions, equipment (to include cost, weight, etc.).
+Better conversion for the rest of the document types, such as Glossary, remaining equipment (to include cost, weight, etc.).

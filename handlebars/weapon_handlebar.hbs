@@ -2,8 +2,9 @@
 ---
 obsidianUIMode: preview
 title: "{{{name}}}"
-cssclasses: pf2e,pf2e-action
+cssclasses: pf2e,pf2e-spell
 tags:
+  - pf2e/weapon
   {{#each system.traits.value}}
   - trait/{{this}}
    {{/each}}
@@ -19,17 +20,19 @@ license: {{system.publication.license}}
 ---
 # {{{name}}}{{#if (and system.actionType.value (and (ne system.actionType.value "action") (ne system.actionType.value "passive")))}} {{{more-handlebars-helpers-table system.actionType.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
 {{~#if (eq system.actionType.value "action")}} {{{more-handlebars-helpers-table system.actions.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
+## Item {{system.level.value}}
 ### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
 {{~#each system.traits.value}}
 [[{{this}}]]{{/each}}
-{{#if system.category}}**Category** {{{system.category}}} {{#if system.range}}ranged{{else}}melee{{/if}} weapon
-{{/if}}{{#if system.price.value}}**Price** {{coinLabel price.value}}
-{{/if}}{{#if system.damage}}**Damage** {{system.damage.dice}}{{system.damage.die}} {{system.damage.damageType}} {{#if system.damage.persistent}}{{system.damage.persistent}}{{/if}}
-{{/if}}{{#if system.splashDamage.value}}**Splash Damage** {{system.splashDamage.value}}
-{{/if}}{{#if system.bulk}}**Bulk** {{system.bulk.value}}
-{{/if}}{{#if system.usage}}**Usage** {{system.usage.value}}
-{{/if}}{{#if system.group}}**Group** {{system.group}}
-{{/if}}{{#if system.prerequisites.value}}**Prerequisites** {{#each system.prerequisites.value}}{{{this.value}}}{{ifThen @last "" "; "}}{{/each}}
+
+|  |  |
+| -- | -- |
+| {{#if system.category}}**Category** {{{system.category}}} {{#if system.range}}ranged{{else}}melee{{/if}} weapon{{/if}} | {{#if system.group}}**Group** {{system.group}}{{/if}} |
+| {{#if system.price.value}}**Price** {{coinLabel price.value}}{{/if}} | {{#if system.bulk}}**Bulk** {{#if (eq system.bulk.value 0.1)}}L{{else}}{{system.bulk.value}}{{/if}} {{/if}}|
+| {{#if system.damage}}**Damage** {{system.damage.dice}}{{system.damage.die}} {{system.damage.damageType}} {{#if system.damage.persistent}}({{system.damage.persistent.number}} persistent {{system.damage.persistent.type}}){{/if}}{{/if}} | {{#if system.usage}}**Usage** {{system.usage.value}}{{/if}} |
+| {{#if system.splashDamage.value}}**Splash Damage** {{system.splashDamage.value}}{{/if}} | |
+
+{{#if system.prerequisites.value}}**Prerequisites** {{#each system.prerequisites.value}}{{{this.value}}}{{ifThen @last "" "; "}}{{/each}}
 * * *{{/if}}
 {{{me-HTMLtoMarkdown system.description.value this}}}
 
