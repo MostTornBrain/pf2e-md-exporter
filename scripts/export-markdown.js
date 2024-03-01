@@ -226,11 +226,11 @@ function convertLinks(markdown, relativeTo) {
             // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
             let pack = game.packs.get(linkdoc.pack);
             if (pack) {
-                result = `${pack.title}/${result}`;
+                // Slashes in the title aren't real paths and as part of the export become underscores
+                let fixed_title = pack.title.replaceAll('/', '_');
+                result = `${fixed_title}/${result}`;
             }
-            //console.log("pack:", pack);
         }
-
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
     }
     
@@ -282,9 +282,10 @@ function convertMarkdownLinks(markdown, relativeTo) {
             // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
             let pack = game.packs.get(linkdoc.pack);
             if (pack) {
-                target = `${pack.title}/${target}`;
+                // Slashes in the title aren't real paths and as part of the export become underscores
+                let fixed_title = pack.title.replaceAll('/', '_');
+                target = `${fixed_title}/${target}`;
             }
-            //console.log("pack:", pack);
         }
 
         return formatLink(target, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion

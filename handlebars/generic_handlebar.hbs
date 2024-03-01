@@ -2,7 +2,7 @@
 ---
 obsidianUIMode: preview
 title: "{{{name}}}"
-cssclasses: pf2e,{{#if (eq type "feat")}}pf2e-spell{{else}}pf2e-action{{/if}}
+cssclasses: pf2e,{{#if system.level.value}}pf2e-spell{{else}}pf2e-action{{/if}}
 tags:
   {{#each system.traits.value}}
   - trait/{{this}}
@@ -19,11 +19,25 @@ license: {{system.publication.license}}
 ---
 # {{{name}}}{{#if (and system.actionType.value (and (ne system.actionType.value "action") (ne system.actionType.value "passive")))}} {{{more-handlebars-helpers-table system.actionType.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
 {{~#if (eq system.actionType.value "action")}} {{{more-handlebars-helpers-table system.actions.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
-{{#if (eq type "feat")}}## Feat {{system.level.value}}{{/if}}
+{{#if system.level.value}}## {{#if (isNumber this.level)~}}
+            {{#if (eq this.type "feat")~}}
+                {{localize "PF2E.Item.Feat.LevelN" level=this.level}}
+            {{~else if (eq this.type "spell")~}}
+                {{localize "PF2E.Item.Spell.LevelN" level=this.level}}
+            {{~else if (eq this.type "effect")~}}
+                {{localize "PF2E.LevelN" level=this.level}}
+            {{~else~}}
+                {{localize "PF2E.Item.Physical.LevelLabel" level=this.level}}
+            {{~/if}}
+{{~/if}}{{/if}}
 ### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
 {{~#each system.traits.value}}
 [[{{this}}]]{{/each}}
-{{#if system.category}}**Category** {{{system.category}}}{{/if}}
+
+{{#if system.category}}**Category** {{{system.category}}}; {{/if}}{{#if system.group}}**Group** {{system.group}}{{/if}}
+{{#if system.price.value}}**Price** {{coinLabel price.value}}; {{/if}}{{#if (gt system.quantity 1)}}**Quantity** {{system.quantity}}{{/if}}
+{{#if system.bulk}}**Bulk** {{#if (eq system.bulk.value 0.1)}}L{{else}}{{system.bulk.value}}{{/if}}; {{/if}}{{#if system.size}}**Size** {{system.size}}{{/if}}
+{{#if system.usage}}**Usage** {{system.usage.value}}{{/if}}
 {{#if system.prerequisites.value}}**Prerequisites** {{#each system.prerequisites.value}}{{{this.value}}}{{ifThen @last "" "; "}}{{/each}}
 * * *{{/if}}
 {{{me-HTMLtoMarkdown system.description.value this}}}
