@@ -33,7 +33,7 @@ Choose `Configure Settings` and pick PF2E Exporter.
 
 _NOTE:_ It is recommended to **NOT** use the UUID of each document as the note name as doing so will populate your vault with a lot of random file names.
 
-- If you own any custom odules that supply monster artwork and you want that artwork to be included, you must enable such modules in your world, and select the option to "Export custom images".
+- If you own any custom modules that supply monster artwork and you want that artwork to be included, you must enable such modules in your world, and select the option to "Export custom images".
 
 - If you want to include markdown for the monsters for Obsidian's [Initiative Tracker](https://github.com/javalent/initiative-tracker) plugin, choose "Include Initiative Tracker markdown".
 
