@@ -32,9 +32,14 @@ Choose `Manage Modules` in your logged into Foundry world.  Enable these three m
 Choose `Configure Settings` and pick PF2E Exporter.
 
 _NOTE:_ It is recommended to **NOT** use the UUID of each document as the note name as doing so will populate your vault with a lot of random file names.
-![PF2E Exporter Settings](Screenshots/MarkdownExporterSettings.png)
+
+- If you own any custom odules that supply monster artwork and you want that artwork to be included, you must enable such modules in your world, and select the option to "Export custom images".
+
+- If you want to include markdown for the monsters for Obsidian's [Initiative Tracker](https://github.com/javalent/initiative-tracker) plugin, choose "Include Initiative Tracker markdown".
 
 Click on `Save Changes`.
+
+![PF2E Exporter Settings](Screenshots/MarkdownExporterSettings.png)
 
 ## 4. Export the Compendium
 You are now ready to export any items from your world, including Pathfinder Compendium items.  If you want to do a quick test, choose to view a monster or spell, then choose to "import" it into your saved items.   Then, right click on that item and choose the last option in the pop-up menu named `Export to Markdown`. If everything is installed correctly, you should see a pop-up message saying it is exporting the data and then a file will be saved named after the item. If the file has multiple items associated with it will be created as a `.zip` file.
