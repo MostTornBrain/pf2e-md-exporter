@@ -63,6 +63,10 @@ It is also recommended to install the ITS Theme so the spells look their best. C
 
 ![ITS](Screenshots/InstallITS.png)
 
+> [!NOTE]
+> If you install ITS, it is also recommended to install the [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) plugin, which allows you to customize the look of ITS.  Specifically, you will likely want to disable the rendering of statblocks by ITS as it conflicts with Fantasy Statblocks.  This can be done via the Style Settings->Plugins->"Disable ITS Styled Statblocks" option.
+> ![StyleSettings](Screenshots/StyleSettings.png)
+
 ### Install the custom CSS snippet for spells
 In addition, copy the `pf2e-spell.css` from this github project into your `.obsidian/snippets` folder.  (If you don't already have a snippets folder, you will need to create it.)   After you copy the snippet file, go into the Obsidian settings, choose `Appearance` and scroll down to the `Snippets` section and enable this `pf2e-spell.css` snippet.
 
