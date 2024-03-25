@@ -46,6 +46,24 @@ Hooks.once('ready', () => {
 		config: true,
 	});
 
+    game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_EXPORT_TOKENS, {
+		name: "Export custom images",
+		hint: "When checked, if any monster being exported contains a custom token reference, that image will also be included in the zip file. NOTE: this will NOT export system default tokens.",
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true,
+	});
+
+    game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_INCLUDE_INITIATIVE, {
+		name: "Include Initiative Tracker markdown",
+		hint: "When checked, any monsters being exported will include markdown to support the Obsidian Initiative Tracker plugin.",
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true,
+	});
+
     // Allow handlebars template to be specified for Actors and Items
     game.settings.register(MOD_CONFIG.MODULE_NAME, `template.Actor`, {
         name: "Actor (generic)",

@@ -24,6 +24,8 @@ const IMG_SIZE = "150";
 
 let use_uuid_for_journal_folder=true;
 let use_uuid_for_notename=true;
+let export_tokens = false;
+let include_initiative_tracker = false;
 
 class DOCUMENT_ICON {
     // indexed by CONST.DOCUMENT_TYPES
@@ -115,12 +117,8 @@ function formatLink(link, label=null, inline=false) {
 
 function fileconvert(filename, label_or_size=null, inline=true) {
     filename = decodeURIComponent(filename);
-    //let basefilename = filename.slice(filename.lastIndexOf("/") + 1);
-    // ensure same base filename in different paths are stored as different files,
-    // whilst keeping the total length below the ZIP limit of 260 characters.
-    let basefilename = filename.replaceAll("/","-").slice(-250 + destForImages.length); 
 
-    zip.folder(destForImages).file(basefilename, 
+    zip.folder(destForImages).file(filename, 
         // Provide a Promise which JSZIP will wait for before saving the file.
         // (Note that a CORS request will fail at this point.)
         fetch(filename).then(resp => {
@@ -128,7 +126,7 @@ function fileconvert(filename, label_or_size=null, inline=true) {
                 console.error(`Failed to fetch file from '${filename}' (response ${resp.status})`)
                 return new Blob();
             } else {
-                console.debug(`Adding file ${basefilename}`);
+                console.debug(`Adding file ${filename}`);
                 return resp.blob();
             }
         }).catch(e => { 
@@ -137,7 +135,7 @@ function fileconvert(filename, label_or_size=null, inline=true) {
         }),
     {binary:true});
 
-    return formatLink(basefilename, label_or_size, inline);
+    return formatLink(filename, label_or_size, inline);
 }
 
 function replaceLinkedFile(str, filename) {
@@ -757,14 +755,21 @@ async function maybeTemplate(path, doc) {
     if (!templatePath) return documentToJSON(path, doc);
     //console.log(`Using handlebars template '${templatePath}' for '${doc.name}'`)
 
-    // Always upload the IMG, if present, but we won't include the corresponding markdown
-    if (doc.img) {
-        fileconvert(doc.img, IMG_SIZE);
-        // Convert the image path to what is being saved.
-        // NOTE: please observe any license restrictions on images from
-        //       journal entries you do not directly own.  
-        //       See: data/systems/pf2e/licenses for PF2e artwork license information.
-        doc.img = doc.img.replaceAll("/","-").slice(-250 + destForImages.length); 
+    // Only upload non-system IMGs, if present.
+    // NOTE: please observe any license restrictions on images from
+    //       journal entries you do not directly own.  
+    //       See: data/systems/pf2e/licenses for PF2e artwork license information. 
+    //       This is why system images are excluded.
+    if (doc.img && export_tokens) {
+        if (! doc.img.includes("systems/")) {
+            // Save the image to the zip file
+            doc.img_path = fileconvert(doc.img, " ", false);
+        }
+    }
+
+    // Add extra property if initiative tracket option was selected
+    if (include_initiative_tracker) {
+        doc.include_initiative = true;
     }
 
     // Apply the supplied template file:
@@ -859,6 +864,8 @@ export async function exportMarkdown(from, zipname) {
 
     use_uuid_for_journal_folder = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_FOLDER_AS_UUID);
     use_uuid_for_notename       = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_NOTENAME_IS_UUID);
+    export_tokens               = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_EXPORT_TOKENS);
+    include_initiative_tracker  = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_INCLUDE_INITIATIVE);
 
     let noteid = ui.notifications.info(`${MODULE_NAME}.ProgressNotification`, {permanent: true, localize: true})
     // Wait for the notification to get drawn

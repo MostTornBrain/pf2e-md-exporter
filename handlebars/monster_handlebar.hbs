@@ -23,7 +23,8 @@ license: {{system.details.publication.license}}
 columns: 2
 forcecolumns: true
 layout: Basic Pathfinder 2e Layout
-source: "{{system.details.publication.title}}"
+{{#if this.img_path}}token: {{this.img_path}}
+{{/if}}source: "{{system.details.publication.title}}"
 name: "{{{name}}}"
 level: "Creature {{system.details.level.value}}"
 {{#if (eq system.traits.rarity "common")}}{{else}}rare_03: "{{capitalize system.traits.rarity}}"{{/if}}
@@ -92,13 +93,15 @@ attacks:
 {{/if}}{{/if}}{{/each}} 
 ```
 
+{{#if this.include_initiative}}
 ```encounter-table
 name: {{{name}}}
 creatures:
   - 1: {{{name}}}
 ```
-{{#if system.details.blurb}}### Description
+
+{{/if}}{{#if system.details.blurb}}
 {{{me-HTMLtoMarkdown system.details.blurb system}}}{{/if}}
 
-{{#if system.details.publicNotes}}### Description
+{{#if system.details.publicNotes}}
 {{{me-HTMLtoMarkdown system.details.publicNotes system}}}{{/if}}
