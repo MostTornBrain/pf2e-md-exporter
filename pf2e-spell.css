@@ -6,7 +6,7 @@
   margin: 0!important;
 }
 
-.pf2e {
+.theme-light .pf2e {
     background-color: rgb(246,244,242);
 }
 
@@ -15,9 +15,7 @@
     font-weight: 700;
     line-height: 1.5em;
     text-transform: uppercase;
-    color: rgb(51,51,51);
     font-family: system-ui, "Pathfinder";
-    background-color: rgb(246,244,242);
     float: left;
     display: inline-block;
     margin: 0;
@@ -28,9 +26,7 @@
     font-weight: 700;
     line-height: 1.56em;
     text-transform: uppercase;
-    color: rgb(51,51,51);
     font-family: system-ui, "Pathfinder";
-    background-color: rgb(246,244,242);
     text-align: right;
     width: 50%;
     display: inline-block;
@@ -56,7 +52,6 @@
     text-transform: uppercase;
     color: #fff!important;
     font-family: system-ui, "Pathfinder";
-    background-color: rgb(246,244,242);
     text-align: left;
     margin: 0;
 }
@@ -125,9 +120,7 @@
   font-weight: 700;
   line-height: 1.5em;
   text-transform: uppercase;
-  color: rgb(51,51,51);
   font-family: system-ui, "Pathfinder";
-  background-color: rgb(246,244,242);
   margin: 0;
 }
 
