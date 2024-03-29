@@ -111,8 +111,7 @@ function formatLink(link, label=null, inline=false) {
     if (label && label != link) body += `|${label}`;
     let result = `[[${body}]]`;
     if (inline) result = "!" + result;
-    // Remove any backslashes from the link
-    return result.replaceAll("\\","");
+    return result;
 }
 
 function fileconvert(filename, label_or_size=null, inline=true) {
@@ -168,9 +167,9 @@ function expandOneLocalize(str, type, target, hash, label, offset, string, group
     }
 }
 
-function convertLinks(markdown, relativeTo) {
+function convertLinks(markdown, doc) {
 
-    // Needs to be nested so that we have access to 'relativeTo'
+    // Needs to be nested so that we have access to 'doc'
     function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
 
         // One of my Foundry Modules introduced adding "inline" to the start of type.
@@ -464,8 +463,27 @@ export function convertHtml(doc, html) {
                                                         // remove that part of the string.
                                                         if (p2.includes('@')) {
                                                             p2 = p2.replace(/@.*?\.pf2e\.\S+/g, '');
-                                                        }
-                                                        return `${result} ${p2.replace(/,/g, ' ')}`;
+                                                        } 
+                                                        // Look for a list of damage rolls and convert each piece,
+                                                        // such as "acid],3d6[persistent,acid],(3[splash])[acid" (which comes from Generate Bomb in Alchemical Golem from Bestiary 1)
+                                                        let parts = p2.split('],');
+                                                        const subDamagePattern = /([^\[\]]+)(\[.*\])/;
+                                                        let damageList = '';
+                                                        parts.forEach((part, index) => {
+                                                            if (index == 0) {
+                                                                damageList = part;
+                                                            } else {
+                                                                part = part.replace(/[()]/g, '');
+                                                                let mathyPartIndex = part.indexOf('[');
+                                                                let mathyPart = part.substring(0,mathyPartIndex);
+                                                                mathyPart = doMath(doc, mathyPart); 
+                                                                // Remove any more brackets from the remaining description
+                                                                let partDescription = part.substring(mathyPartIndex+1).replace(/[\[\]]/g, ' ');
+                                                                damageList = damageList + ' + ' + mathyPart + ' ' + partDescription;
+                                                            }
+                                                        });
+                                                        
+                                                        return `${result} ${damageList.replace(/,/g, ' ')}`;
                                                     });
 
         // Convert simple @Damager[2d4] to plain text
@@ -516,6 +534,9 @@ export function convertHtml(doc, html) {
                                                             return `${p1} check`;
                                                         }   
                                                     });
+
+        // Add an extra line break before a table so markdown renders it correctly:
+        markdown = markdown.replaceAll("<table", "\n<br/>\n<table");
 
         // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
@@ -761,7 +782,7 @@ async function maybeTemplate(path, doc) {
     //       See: data/systems/pf2e/licenses for PF2e artwork license information. 
     //       This is why system images are excluded.
     if (doc.img && export_tokens) {
-        if (! doc.img.includes("systems/")) {
+        if (! doc.img.includes("systems/") && ! doc.img.includes("icons/")) {
             // Save the image to the zip file
             doc.img_path = fileconvert(doc.img, " ", false);
         }

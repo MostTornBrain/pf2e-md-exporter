@@ -300,11 +300,11 @@ Hooks.once('ready', () => {
 
       text = convertHtml(context, text)
         .replaceAll('\n', '\\n')       // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
+        .replaceAll('\\|', '\\\\|')    // Replace all \| with "\\|" so wikilinks in the Statblock don't break.
         .replaceAll('\\n* * *', '\\n') // Replace Markdown "* * *" HR.  It will not work there.
         .replace(/(\\n)\1+/g, '\\n')   // Compress repeated newlines into a single one.
         .replaceAll('"', '\\"')        // Escape all double quotes.
         .replace(/^\w+$/g, '');        // If we end up with only whitespace, return ''
-
     }
     return text;
   });
