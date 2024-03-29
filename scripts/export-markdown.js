@@ -111,6 +111,7 @@ function formatLink(link, label=null, inline=false) {
     if (label && label != link) body += `|${label}`;
     let result = `[[${body}]]`;
     if (inline) result = "!" + result;
+    result = result.replaceAll("\\_", "_");
     return result;
 }
 
