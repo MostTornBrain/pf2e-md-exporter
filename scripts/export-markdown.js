@@ -174,35 +174,37 @@ function dummyLink(target, label) {
 }
 
 function uuidFailSafe(target, label) {
-    // Foundry's fromUuidSync() will thrown an error if the UUID 
-    // document is only available via an async operation.
-    // We can't resolve async function calls via a handlebar, so let's try another approach...
-    
-    // I discovered this function mentioned in foundry.js:
-    // let {collection, documentId, documentType, embedded, doc} = foundry.utils.parseUuid(target);
+    if (!use_uuid_for_notename) {
+        // Foundry's fromUuidSync() will thrown an error if the UUID 
+        // document is only available via an async operation.
+        // We can't resolve async function calls via a handlebar, so let's try another approach...
+        
+        // I discovered this function mentioned in foundry.js:
+        // let {collection, documentId, documentType, embedded, doc} = foundry.utils.parseUuid(target);
 
-    // Get the UUID parts for the target - that can always be done synchronously.
-    let uuidParts = foundry.utils.parseUuid(target);
+        // Get the UUID parts for the target - that can always be done synchronously.
+        let uuidParts = foundry.utils.parseUuid(target);
 
-    // Using the UUID parts information from the target, get the UUID of the target's parent
-    let parentUuid = uuidParts.collection.getUuid(uuidParts.documentId);
-    
-    // Now that we have the parent's UUID, get it in document form.
-    // In testing, it appears the parent can be fetched via a synchronoous operation, which is what we need.
-    let parentDoc = fromUuidSync(parentUuid);
+        // Using the UUID parts information from the target, get the UUID of the target's parent
+        let parentUuid = uuidParts.collection.getUuid(uuidParts.documentId);
+        
+        // Now that we have the parent's UUID, get it in document form.
+        // In testing, it appears the parent can be fetched via a synchronoous operation, which is what we need.
+        let parentDoc = fromUuidSync(parentUuid);
 
-    if (parentDoc) {
-        // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
-        let pack = game.packs.get(parentDoc.pack);
-        if (pack) {
-            // Slashes in the title aren't real paths and as part of the export become underscores
-            let fixed_title = pack.title.replaceAll('/', '_');
-            let result = `${fixed_title}/${parentDoc.name}/${label}`;
-            //console.log("Resolved URL:", result);
-            return formatLink(result, label, /*inline*/false);
+        if (parentDoc) {
+            // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+            let pack = game.packs.get(parentDoc.pack);
+            if (pack) {
+                // Slashes in the title aren't real paths and as part of the export become underscores
+                let fixed_title = pack.title.replaceAll('/', '_');
+                let result = `${fixed_title}/${parentDoc.name}/${label}`;
+                //console.log("Resolved URL:", result);
+                return formatLink(result, label, /*inline*/false);
+            }
         }
+        console.log("Ooops.... we fell through.  Unresolved URL: ", target);
     }
-    console.log("Ooops.... we fell through.  Unresolved URL: ", target);
     return dummyLink(target, label);
 }
 
@@ -211,7 +213,7 @@ function convertLinks(markdown, doc) {
     // Needs to be nested so that we have access to 'doc'
     function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
 
-        // One of my Foundry Modules introduced adding "inline" to the start of type.
+        // Some Foundry modules introduced adding "inline" to the start of type.
         let inline = type.startsWith("inline");
         if (inline) type = type.slice("inline".length);
         // Maybe handle `@PDF` links properly too
@@ -248,18 +250,20 @@ function convertLinks(markdown, doc) {
             }
         }
 
-        // Append a 1 to the condition since the filename will have a 1 appended to it.
-        if (SPECIAL_CONDITIONS.includes(result)) {
-            result = `${result} 1`;
-        }
+        if (!use_uuid_for_notename) {
+            // Append a 1 to the condition since the filename will have a 1 appended to it.
+            if (SPECIAL_CONDITIONS.includes(result)) {
+                result = `${result} 1`;
+            }
 
-        if (linkdoc) {
-            // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
-            let pack = game.packs.get(linkdoc.pack);
-            if (pack) {
-                // Slashes in the title aren't real paths and as part of the export become underscores
-                let fixed_title = pack.title.replaceAll('/', '_');
-                result = `${fixed_title}/${result}`;
+            if (linkdoc) {
+                // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+                let pack = game.packs.get(linkdoc.pack);
+                if (pack) {
+                    // Slashes in the title aren't real paths and as part of the export become underscores
+                    let fixed_title = pack.title.replaceAll('/', '_');
+                    result = `${fixed_title}/${result}`;
+                }
             }
         }
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
