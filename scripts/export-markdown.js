@@ -168,6 +168,44 @@ function expandOneLocalize(str, type, target, hash, label, offset, string, group
     }
 }
 
+function dummyLink(target, label) {
+    // Make sure that "|" in the ID don't start the label early (e.g. @PDF[whatever|page=name]{label})
+    return formatLink(target, label);
+}
+
+function uuidFailSafe(target, label) {
+    // Foundry's fromUuidSync() will thrown an error if the UUID 
+    // document is only available via an async operation.
+    // We can't resolve async function calls via a handlebar, so let's try another approach...
+    
+    // I discovered this function mentioned in foundry.js:
+    // let {collection, documentId, documentType, embedded, doc} = foundry.utils.parseUuid(target);
+
+    // Get the UUID parts for the target - that can always be done synchronously.
+    let uuidParts = foundry.utils.parseUuid(target);
+
+    // Using the UUID parts information from the target, get the UUID of the target's parent
+    let parentUuid = uuidParts.collection.getUuid(uuidParts.documentId);
+    
+    // Now that we have the parent's UUID, get it in document form.
+    // In testing, it appears the parent can be fetched via a synchronoous operation, which is what we need.
+    let parentDoc = fromUuidSync(parentUuid);
+
+    if (parentDoc) {
+        // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+        let pack = game.packs.get(parentDoc.pack);
+        if (pack) {
+            // Slashes in the title aren't real paths and as part of the export become underscores
+            let fixed_title = pack.title.replaceAll('/', '_');
+            let result = `${fixed_title}/${parentDoc.name}/${label}`;
+            //console.log("Resolved URL:", result);
+            return formatLink(result, label, /*inline*/false);
+        }
+    }
+    console.log("Ooops.... we fell through.  Unresolved URL: ", target);
+    return dummyLink(target, label);
+}
+
 function convertLinks(markdown, doc) {
 
     // Needs to be nested so that we have access to 'doc'
@@ -178,11 +216,6 @@ function convertLinks(markdown, doc) {
         if (inline) type = type.slice("inline".length);
         // Maybe handle `@PDF` links properly too
 
-        function dummyLink() {
-            // Make sure that "|" in the ID don't start the label early (e.g. @PDF[whatever|page=name]{label})
-            return formatLink(target, label);
-        }
-
         // Ignore link if it isn't one that we can parse.
         const documentTypes = new Set(CONST.DOCUMENT_LINK_TYPES.concat(["Compendium", "UUID"]));
         if (!documentTypes.has(type)) return str;
@@ -192,11 +225,11 @@ function convertLinks(markdown, doc) {
 
         let linkdoc;
         try {
-            linkdoc = fromUuidSync(target);
             if (!label && !hash) label = doc.name;
-        } catch (error) {
-            console.debug(`Unable to fetch label from Compendium for ${target}`, error)
-            return dummyLink();
+           linkdoc = fromUuidSync(target);
+         } catch (error) {
+            //console.log(`Unable to fetch label from Compendium for ${target}`, error);
+            return uuidFailSafe(target, label);
         }
 
         if (!linkdoc) return dummyLink();
@@ -252,18 +285,13 @@ function convertMarkdownLinks(markdown, relativeTo) {
     // Needs to be nested so that we have access to 'relativeTo'
     function replaceOneLink(str, target, label) {
 
-        function dummyLink() {
-            // Make sure that "|" in the ID don't start the label early (e.g. @PDF[whatever|page=name]{label})
-            return formatLink(target, label);
-        }
-
         let linkdoc;
         try {
-            linkdoc = fromUuidSync(target);
             if (!label) label = doc.name;
+            linkdoc = fromUuidSync(target);
         } catch (error) {
-            console.debug(`Unable to fetch label from Compendium for ${target}`, error)
-            return dummyLink();
+            //console.log(`Unable to fetch label from Compendium for ${target}`, error);
+            return uuidFailSafe(target, label);
         }
 
         //console.log("Linkdoc:", linkdoc, target, label);
