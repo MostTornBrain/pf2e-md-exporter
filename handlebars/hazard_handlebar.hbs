@@ -1,11 +1,13 @@
 {{! This handlebar is based on one courtesy of Josh P.  It will handle Hazards exported from Foundry.  It relies on two modules, PF2E Exporter and More Handlebars Helpers.}}
 ---
 title: {{{name}}}
+obsidianUIMode: preview
 noteType: pf2eHazard
 tags:
 {{#each system.traits.value as |trait|}}
   - {{trait}}
 {{/each}}
+{{#if system.details.isComplex}}  - complex{{/if}}
 {{#if system.details.publication.remaster}}
   - remaster
 {{/if~}}
@@ -13,6 +15,7 @@ source: {{system.details.publication.title}}
 aliases: "{{{uuid}}}" 
 level: {{system.details.level.value}}
 license: {{system.details.publication.license}}
+statblock: inline
 ---
 
 ```statblock
@@ -23,11 +26,14 @@ source: "{{{system.details.publication.title}}}"
 name: "{{{name}}}"
 level: "Hazard {{system.details.level.value}}"
 {{#if system.traits.rarity}}{{else}}rare_03: "{{capitalize system.traits.rarity}}"{{/if}}
+{{#if system.details.isComplex}}trait_06: "Complex"{{/if}}
 {{#each system.traits.value as |trait index|}}
 trait_0{{add index 1}}: "{{trait}}"
 {{/each}}
+modifier: {{system.attributes.stealth.value}}
 sourcebook: "_{{{system.details.publication.title}}}_"
 {{#if system.attributes.ac.value}}
+ac: {{system.attributes.ac.value}}
 armorclass:
   - name: AC
     desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__ {{numberFormat system.saves.fortitude.value sign=true}}, __Ref__ {{numberFormat system.saves.reflex.value sign=true}}, __Will__ {{numberFormat system.saves.will.value sign=true}}{{#if system.attributes.allSaves.value}}; {{system.attributes.allSaves.value}}{{/if}}"
@@ -40,7 +46,7 @@ health:
 perception:
   - name: ""
 {{#if system.attributes.stealth}}
-  - name: "Stealth DC {{add system.attributes.stealth.value 10}}" 
+  - name: "Stealth DC {{#if system.details.isComplex}}{{system.attributes.stealth.value}}{{else}}{{add system.attributes.stealth.value 10}}{{/if}}" 
     desc: "{{#if (me-HTMLtoYAML system.attributes.stealth.details system)}}{{{me-HTMLtoYAML system.attributes.stealth.details system}}}{{else}} {{numberFormat system.attributes.stealth.value sign=true}}{{/if}}"
 {{/if}}
 abilities_top:
@@ -72,3 +78,12 @@ attacks:
   - name: "Reset"
     desc: "{{{me-HTMLtoYAML system.details.reset system}}}"{{/if}}
 ```
+
+{{#if this.include_initiative}}
+```encounter-table
+name: {{{name}}}
+creatures:
+  - 1: {{{name}}}
+```
+
+{{/if}}
