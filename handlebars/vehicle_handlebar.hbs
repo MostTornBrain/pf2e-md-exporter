@@ -1,0 +1,95 @@
+{{! This handlebar will handle Vehicles exported from Foundry.  It relies on two modules, PF2E Exporter and More Handlebars Helpers.}}
+---
+title: {{{name}}}
+obsidianUIMode: preview
+noteType: pf2eVehicle
+cssClasses: pf2e
+tags:
+{{#each system.traits.value as |trait|}}
+  - {{trait}}
+{{/each}}
+{{#if system.details.isComplex}}  - complex{{/if}}
+{{#if system.details.publication.remaster}}
+  - remaster
+{{/if~}}
+source: {{system.details.publication.title}}
+aliases: "{{{uuid}}}" 
+level: {{system.details.level.value}}
+license: {{system.details.publication.license}}
+statblock: inline
+---
+
+```statblock
+columns: 2
+forcecolumns: true
+layout: Basic Pathfinder 2e Layout
+source: "{{{system.details.publication.title}}}"
+name: "{{{name}}}"
+level: "Vehicle {{system.details.level.value}}"
+{{#if (eq system.traits.rarity "common")}}{{else}}rare_03: "{{capitalize system.traits.rarity}}"{{/if}}
+{{#if system.details.isComplex}}trait_06: "Complex"{{/if}}
+size: "{{more-handlebars-helpers-table system.traits.size.value "ti" "Tiny" "sm" "Small" "med" "Medium" "lg" "Large" "hu" "Huge" "ga" "Gargantuan" "grg" "Gargantuan"}}"
+{{#each system.traits.value as |trait index|}}
+trait_0{{add index 1}}: "{{trait}}"
+{{/each}}
+modifier: {{system.attributes.stealth.value}}
+perception:
+  - name: ""
+  - name: "Price"
+    desc: "{{system.details.price}} gp\n* * *"
+{{#if system.details.description}}
+  - name: ""
+    desc: "{{{me-HTMLtoYAML system.details.description system}}}\n* * *"
+{{/if}}
+abilities_top:
+  - name: ""
+  - name: "Space"
+    desc: "{{system.details.space.long}} feet long, {{system.details.space.wide}} feet wide, {{system.details.space.high}} feet high"
+  - name: "Crew"
+    desc: "{{system.details.crew}}; **Passengers** {{system.details.passengers}}"
+  - name: "Piloting Check"
+    desc: "{{system.details.pilotingCheck}}"
+{{#if system.attributes.ac.value}}
+ac: {{system.attributes.ac.value}}
+armorclass:
+  - name: AC
+    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__ {{numberFormat system.saves.fortitude.value sign=true}}{{#if system.saves.reflex.value}}, __Ref__ {{numberFormat system.saves.reflex.value sign=true}}{{/if}}{{#if system.saves.will.value}}, __Will__ {{numberFormat system.saves.will.value sign=true}}{{#if system.attributes.allSaves.value}}{{/if}}; {{system.attributes.allSaves.value}}{{/if}}"
+hp: {{system.attributes.hp.value}}
+health:
+  - name: ""
+  - name: "Hardness"
+    desc: "{{system.attributes.hardness}}; **HP** {{system.attributes.hp.value}} (BT {{multiply system.attributes.hp.value 0.5}}){{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
+{{/if}}
+speed: "{{system.details.speed}}"
+abilities_mid:
+  - name: ""
+attacks:
+  - name: ""
+  - name: "Collision"
+    desc: "{{system.attributes.collisionDamage.value}} (DC {{system.attributes.collisionDC.value}})"
+{{#each items}}{{#if (eq type "action")}}
+  - name: "{{{name}}}"
+    desc: "{{#if (eq system.actionType.value "action")}}`pf2:{{system.actions.value}}`{{else}}{{{more-handlebars-helpers-table system.actionType.value "passive" "" "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
+{{~#if system.traits.value.length}} ({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}}){{/if}} {{{me-HTMLtoYAML system.description.value system}}}"
+{{/if}}
+{{#if (eq type "melee")}}
+  - name: "Melee"
+    desc: "{{{name}}} {{numberFormat system.bonus.value sign=true}} ({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}}) {{{me-HTMLtoYAML system.description.value system}}}"
+{{/if}}{{/each}}
+{{#if system.details.routine}}
+  - name: "Routine"
+    desc: "{{{me-HTMLtoYAML system.details.routine system}}}"{{/if}}
+{{#if system.details.reset}}
+  - name: "Reset"
+    desc: "{{{me-HTMLtoYAML system.details.reset system}}}"{{/if}}
+sourcebook: "_{{{system.details.publication.title}}}_"
+```
+
+{{#if this.include_initiative}}
+```encounter-table
+name: {{{name}}}
+creatures:
+  - 1: {{{name}}}
+```
+
+{{/if}}

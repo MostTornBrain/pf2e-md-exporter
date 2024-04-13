@@ -81,6 +81,8 @@ Hooks.once('ready', () => {
         let handlebarDefault = "";
         if (label == 'TYPES.Actor.hazard') {
           handlebarDefault = "modules/pf2e-md-exporter/handlebars/hazard_handlebar.hbs";
+        } else if (label == 'TYPES.Actor.vehicle') {
+          handlebarDefault = "modules/pf2e-md-exporter/handlebars/vehicle_handlebar.hbs";
         }
         game.settings.register(MOD_CONFIG.MODULE_NAME, `template.Actor.${type}`, {
             name: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.actorTemplate.Name`, {name: actorname}),
@@ -303,8 +305,10 @@ Hooks.once('ready', () => {
         .replaceAll('\\|', '\\\\|')    // Replace all \| with "\\|" so wikilinks in the Statblock don't break.
         .replaceAll('\\n* * *', '\\n') // Replace Markdown "* * *" HR.  It will not work there.
         .replace(/(\\n)\1+/g, '\\n')   // Compress repeated newlines into a single one.
+        .replaceAll('\\n\\-', '\\n-')  // Replace escaped "line items" with normal dash.
         .replaceAll('"', '\\"')        // Escape all double quotes.
-        .replace(/^\w+$/g, '');        // If we end up with only whitespace, return ''
+        .replace(/^\w+$/g, '')         // If we end up with only whitespace, return ''
+        .replaceAll('\\[reaction\\]', '`pf2:r`');
     }
     return text;
   });
