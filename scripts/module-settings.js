@@ -303,12 +303,18 @@ Hooks.once('ready', () => {
       text = convertHtml(context, text)
         .replaceAll('\n', '\\n')       // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
         .replaceAll('\\|', '\\\\|')    // Replace all \| with "\\|" so wikilinks in the Statblock don't break.
-        .replaceAll('\\n* * *', '\\n') // Replace Markdown "* * *" HR.  It will not work there.
-        .replace(/(\\n)\1+/g, '\\n')   // Compress repeated newlines into a single one.
-        .replaceAll('\\n\\-', '\\n-')  // Replace escaped "line items" with normal dash.
+        .replaceAll('\\n* * *', '\\n* * *\\n') // Format Markdown "* * *" HR to ensure it has a trailing newline.
+        //.replace(/(\\n)\1+/g, '\\n')   // Compress repeated newlines into a single one.
+        .replaceAll('\\-', '-')        // Replace escaped dash with normal dash.
+        .replaceAll('\\*', '*')        // Replace escaped asterisk with normal asterisk.
+        .replaceAll('\\.', '.')        // Replace escaped period with normal period.
         .replaceAll('"', '\\"')        // Escape all double quotes.
         .replace(/^\w+$/g, '')         // If we end up with only whitespace, return ''
-        .replaceAll('\\[reaction\\]', '`pf2:r`');
+        .replaceAll('\\[reaction\\]', '`pf2:r`')
+        .replaceAll('\\[three-actions\\]', '`pf2:3`')
+        .replaceAll('\\[', '[')        // Replace escaped brackets with normal brackets.
+        .replaceAll('\\]', ']')
+        .replaceAll('\\n\\n* * *\\n\\n', '\\n* * *\\n');
     }
     return text;
   });

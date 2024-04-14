@@ -17,51 +17,68 @@ tags:
   - remaster
 {{/if~}}
 aliases: "{{{uuid}}}" 
+license: {{system.publication.license}}
+statblock: inline
 ---
-# {{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}  
-## {{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}
-### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
-{{~#each system.traits.value}}
-[[{{this}}]]{{/each}}
-{{#if system.traits.traditions}}**Traditions** {{#each system.traits.traditions}}[[{{this}}]]{{ifThen @last "" ", "}}{{/each}}{{/if}}
-{{#unless actionGlyph}}**Cast** {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/unless}}
+```statblock
+name: "{{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}"
+level: "{{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}"
+{{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "rare_03: Uncommon" "rare" "rare_03: Rare" "unique" "rare_03: Unique"}}}
+{{#each system.traits.value as |trait index|}}trait_0{{add index 1}}: "{{trait}}"
+{{/each~}}
+layout: Basic Pathfinder 2e Layout
+columns: 1
+columnWidth: x
+abilities_top:
+  - name: ""
+{{#if system.traits.traditions}}
+  - name: "Traditions"
+    desc: "{{#each system.traits.traditions}}{{this}}{{ifThen @last "" ", "}}{{/each}}"
+{{/if~}}
+
+{{#unless actionGlyph}}  - name: "Cast"
+    desc: "{{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/unless}}
+{{~#if system.cost.value~}}
+; **Cost** {{{system.cost.value}}}
+{{~/if~}}
 {{~#if system.ritual.secondary.casters~}}
 ; **Secondary Casters** {{system.ritual.secondary.casters}}
-{{/if~}}
+{{~/if~}}
+{{#unless actionGlyph}}"
+{{/unless}}
 
-{{#if system.cost.value~}}
-**Cost** {{{system.cost.value}}}
-{{/if~}}
-
-{{#if system.ritual.primary.check~}}
-**Primary Check** {{system.ritual.primary.check}}
-{{/if~}}
-
+{{~#if system.ritual.primary.check}}
+  - name: "Primary Check"
+    desc: "{{system.ritual.primary.check}}
+{{~/if~}}
 {{#if system.ritual.secondary.checks~}}
-**Secondary Checks** {{system.ritual.secondary.checks}}
+; **Secondary Checks** {{system.ritual.secondary.checks}}
+{{~/if~}}
+{{~#if system.ritual.primary.check}}"
 {{/if~}}
 
-{{#if system.range.value~}}
-**Range** {{system.range.value}}
-{{/if~}}
-
+{{#if system.range.value}}
+  - name: "Range"
+    desc: "{{system.range.value}}{{/if~}}
 {{#if system.area~}}
-**Area** {{system.area.value}}-foot {{system.area.type}}
+{{#if system.range.value}}; {{/if}}**Area** {{system.area.value}}-foot {{system.area.type}}
 {{/if~}}
-
 {{#if system.target.value~}}
-**Targets** {{system.target.value}}
+{{#if system.range.value}}; {{/if}}**Targets** {{system.target.value}}{{/if~}}
+{{#if system.range.value~}}"
 {{/if~}}
 
 {{#if system.defense.save}}
-**Saving Throw** {{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}
+  - name: "Defense"
+    desc: "{{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}"
 {{/if~}}
 
 {{#if system.duration.value}}
-**Duration** {{system.duration.value}}
+  - name: "Duration"
+    desc: "{{system.duration.value}}"
 {{/if}}
-* * * 
-{{{me-HTMLtoMarkdown system.description.value this}}}
-
-*Source: {{{system.publication.title}}}*
-*{{system.publication.license}}*
+abilities_mid:
+  - name: ""
+    desc: "{{{me-HTMLtoYAML system.description.value this}}}"
+sourcebook: "_{{{system.publication.title}}}_"
+```

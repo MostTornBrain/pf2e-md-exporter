@@ -58,7 +58,7 @@ hp: {{system.attributes.hp.value}}
 health:
   - name: ""
   - name: "Hardness"
-    desc: "{{system.attributes.hardness}}; **HP** {{system.attributes.hp.value}} (BT {{multiply system.attributes.hp.value 0.5}}){{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
+    desc: "{{system.attributes.hardness}}; **HP** {{system.attributes.hp.value}} (BT {{multiply system.attributes.hp.value 0.5}}){{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses as |weakness|}}{{weakness.label}}{{#each ../rules}}{{#if (and (eq this.key "Weakness") (eq this.label weakness.source))}}{{#each this.predicate}}{{#if (eq this.not "self:condition:broken")}} until broken{{else}} {{this.not}}{{/if}}{{/each}}{{/if}}{{/each}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
 {{/if}}
 speed: "{{system.details.speed}}"
 abilities_mid:

@@ -37,8 +37,8 @@ modifier: {{system.perception.value}}
 perception:
   - name: "Perception"
     desc: "{{numberFormat system.perception.value sign=true}}; {{#each system.perception.senses as |sense|}}{{sense.label}}{{ifThen @last "" ", "}}{{/each}}"
-{{#if system.details.languages.value}}
-languages: "{{#each system.details.languages.value as |language|}}{{capitalize language}}{{ifThen @last "" ", "}}{{/each}}"
+{{#if (or system.details.languages.value system.details.languages.details)}}
+languages: "{{#each system.details.languages.value as |language|}}{{capitalize language}}{{ifThen @last "" ", "}}{{/each}}{{#if system.details.languages.details}}{{#if system.details.languages.value}}; {{/if}}{{system.details.languages.details}}{{/if}}"
 {{/if}}
 skills:
   - name: "Skills"

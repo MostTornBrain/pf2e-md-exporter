@@ -12,10 +12,10 @@
 
 .pf2e-spell h1 {
     font-size: 1.3em;
-    font-weight: 700;
-    line-height: 1.5em;
+    font-weight: 300;
+    line-height: 1.57em;
     text-transform: uppercase;
-    font-family: system-ui, "Pathfinder";
+    font-family: 'Oswald-Regular', var(--font-default), sans-serif;
     float: left;
     display: inline-block;
     margin: 0;
@@ -23,10 +23,10 @@
 
 .pf2e-spell h2 {
     font-size: 1.3em;
-    font-weight: 700;
+    font-weight: 300;
     line-height: 1.56em;
     text-transform: uppercase;
-    font-family: system-ui, "Pathfinder";
+    font-family: 'Oswald-Regular', var(--font-default), sans-serif;
     text-align: right;
     width: 50%;
     display: inline-block;
@@ -46,19 +46,18 @@
 }
 
 .pf2e h3 {
-    font-size: 12px;
-    font-weight: 900;
+    font-size: 15px;
+    font-weight: 300;
     line-height: 1.33em;
     text-transform: uppercase;
     color: #fff!important;
-    font-family: system-ui, "Pathfinder";
+    font-family: 'Oswald-Regular', var(--font-default), sans-serif;
     text-align: left;
     margin: 0;
 }
 
 .pf2e h3 a {
     font-size: inherit;
-    font-weight: inherit;
     line-height: inherit;
     text-transform: uppercase;
     color: inherit;
@@ -69,9 +68,9 @@
     border-color: #d9c484;
     background-clip: border-box;
     border-style: solid;
+    border-width: 0.2rem;
     color: rgb(232, 232, 232) !important;
     cursor: help;
-    font-weight: 700;
     padding: 0.1rem;
     margin: 0.0;
     text-align: center;
@@ -79,8 +78,7 @@
     word-break: keep-all;
     font-style: normal;
     display: inline-block;
-    border-width: 0.2rem;
-    
+    font-weight: 300;
     pointer-events:none;
 }
 
@@ -91,7 +89,6 @@
     border-style: solid;
     color: rgb(232, 232, 232) !important;
     cursor: help;
-    font-weight: 700;
     padding: 0.1rem;
     margin: 0.0;
     text-align: center;
@@ -100,6 +97,7 @@
     font-style: normal;
     display: inline-block;
     border-width: 0.2rem;
+    font-weight: 300;
 }
 
 .pf2e-spell h3:after {
@@ -108,19 +106,57 @@
   height: 0;     /* Remove any height */
 }
 
-.pf2e-spell p {
-  margin-top: 3px;
-  margin-bottom: 1;
-  line-height: 1.2;
+.pf2e ul {
+  font-family: 'GoodOT-WideLight', 'Merriweather Sans', var(--font-default), sans-serif;
+  font-weight: 200;
+  letter-spacing: -0.6px;
+  word-spacing: 0.2rem;
 }
 
+.pf2e p:not(.statblock-item-inline p) {
+  margin-top: 3px;
+  margin-bottom: 1;
+  line-height: 1.3;
+  font-family: 'GoodOT-WideLight', 'Merriweather Sans', var(--font-default), sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.6px;
+/*  word-spacing: 0.2rem;*/
+}
+
+.pf2e .statblock p:not(.statblock-item-inline p) {
+  margin-top: 3px;
+  margin-bottom: 1;
+  line-height: 1.3;
+  font-family: 'GoodOT-WideLight', 'Merriweather Sans', var(--font-default), sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.6px;
+/*  word-spacing: 0.2rem;*/
+}
+
+
+.pf2e .statblock-item-inline p,
+.statblock.basic-pathfinder-2e-layout .statblock-table-header,
+.statblock.basic-pathfinder-2e-layout .property-name {
+  font-family: 'Oswald-Regular', var(--font-default), sans-serif;
+} 
+
+.statblock.basic-pathfinder-2e-layout {
+  --statblock-content-font-size: 16px;
+}
+
+.pf2e b,
+.pf2e strong {
+  font-family: 'Oswald-Regular', var(--font-default), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0px;
+}
 
 .pf2e-action h1 {
   font-size: 1.3em;
   font-weight: 700;
   line-height: 1.5em;
   text-transform: uppercase;
-  font-family: system-ui, "Pathfinder";
+  font-family: 'Oswald-Regular', var(--font-default), sans-serif;
   margin: 0;
 }
 
@@ -150,3 +186,25 @@
   height: 0!important;
   margin: 0!important;
 }
+
+.statblock.basic-pathfinder-2e-layout img {
+    display: inline;
+    position: relative;
+    transform: rotateY(0deg);
+    object-fit: contain;
+    border-radius: 0;
+}
+
+/* For Fantasy Statblocks so they better match remaster look */
+ .line.trait_01, .line.trait_02, .line.trait_03, .line.trait_04, .line.trait_05, .line.trait_06, .line.trait_07,
+ .line.alignment,.line.size,
+ .line.rare_01, .line.rare_02, .line.rare_03, .line.rare_04 {
+    border-color: #d9c484;
+    background-clip: border-box;
+    border-style: solid;
+    border-width: 0.2rem;
+    color: rgb(232, 232, 232) !important;
+    --statblock-traits-gap: 0;
+    padding: 0.2em 0.4em 0.1em!important;
+}
+
