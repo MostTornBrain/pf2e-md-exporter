@@ -55,19 +55,18 @@ abilities_top:
 ; **Secondary Checks** {{system.ritual.secondary.checks}}
 {{~/if~}}
 {{~#if system.ritual.primary.check}}"
-{{/if~}}
-
+{{/if}}
 {{#if system.range.value}}
-  - name: "Range"
-    desc: "{{system.range.value}}{{/if~}}
+  - name: "Range"{{else}}{{#if system.area.value}}
+  - name: "Area"{{else}}{{#if system.target.value}}
+  - name: "Target"
+{{/if}}{{/if}}{{/if}}
+    desc: "{{#if system.range.value}}{{system.range.value}}{{/if~}}
 {{#if system.area~}}
-{{#if system.range.value}}; {{/if}}**Area** {{system.area.value}}-foot {{system.area.type}}
-{{/if~}}
+{{#if system.range.value}}; **Area** {{/if}}{{system.area.value}}-foot {{system.area.type}}
+{{~/if~}}
 {{#if system.target.value~}}
-{{#if system.range.value}}; {{/if}}**Targets** {{system.target.value}}{{/if~}}
-{{#if system.range.value~}}"
-{{/if~}}
-
+{{#if system.range.value}}; **Targets** {{/if}}{{system.target.value}}{{/if~}}"
 {{#if system.defense.save}}
   - name: "Defense"
     desc: "{{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}"
