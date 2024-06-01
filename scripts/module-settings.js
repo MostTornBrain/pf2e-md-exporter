@@ -83,6 +83,8 @@ Hooks.once('ready', () => {
           handlebarDefault = "modules/pf2e-md-exporter/handlebars/hazard_handlebar.hbs";
         } else if (label == 'TYPES.Actor.vehicle') {
           handlebarDefault = "modules/pf2e-md-exporter/handlebars/vehicle_handlebar.hbs";
+        } else if (label == 'TYPES.Actor.army') {
+          handlebarDefault = "modules/pf2e-md-exporter/handlebars/army_handlebar.hbs";
         }
         game.settings.register(MOD_CONFIG.MODULE_NAME, `template.Actor.${type}`, {
             name: game.i18n.format(`${MOD_CONFIG.MODULE_NAME}.actorTemplate.Name`, {name: actorname}),
