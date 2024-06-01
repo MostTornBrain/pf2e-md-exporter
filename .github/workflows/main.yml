@@ -35,13 +35,13 @@ name: Create Module Files For GitHub Release
 
 env:
   # The URL used for the module's "Project URL" link on FoundryVTT's website.
-  project_url: "https://github.com/${{github.repository}}"
+  project_url: "https://github.com/${{github.repository}}/tree/feature/v12-support"
 
   # A URL that will always point to the latest manifest.
   # FoundryVTT uses this URL to check whether the current module version that
   # is installed is the latest version. This URL should NOT change,
   # otherwise FoundryVTT won't be able to perform this check.
-  latest_manifest_url: "https://github.com/${{github.repository}}/releases/latest/download/module.json"
+  latest_manifest_url: "https://raw.githubusercontent.com/${{github.repository}}/feature/v12-support/moduleV12.json"
 
   # The URL to the module archive associated with the module release being
   # processed by this workflow.
