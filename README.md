@@ -1,6 +1,8 @@
 
 # PF2E Exporter Process Overview
 
+**NOTE** This the Foundry V12 beta branch.
+
 > [!CAUTION] 
 > This is a modification of the [Markdown Exporter](https://github.com/farling42/fvtt-export-markdown) module.   It was modified so it produces more usable Pathfinder 2E Remaster content in markdown format for Obisidian.  Since it is a derivative of the Markdown Exporter module, it is important to know you should not have both modules active at the same time in a single world.  They both modify menus in the same way, so will very likely cause confusing behavior.
 
