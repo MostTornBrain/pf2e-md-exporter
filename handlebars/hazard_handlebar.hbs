@@ -1,4 +1,5 @@
 {{! This handlebar is based on one courtesy of Josh P.  It will handle Hazards exported from Foundry.  It relies on two modules, PF2E Exporter and More Handlebars Helpers.}}
+{{!-- me-debugDumpObject "Hazard JSON" --}}
 ---
 title: {{{name}}}
 obsidianUIMode: preview
@@ -36,7 +37,7 @@ sourcebook: "_{{{system.details.publication.title}}}_"
 ac: {{system.attributes.ac.value}}
 armorclass:
   - name: AC
-    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__ {{numberFormat system.saves.fortitude.value sign=true}}, __Ref__ {{numberFormat system.saves.reflex.value sign=true}}, __Will__ {{numberFormat system.saves.will.value sign=true}}{{#if system.attributes.allSaves.value}}; {{system.attributes.allSaves.value}}{{/if}}"
+    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; {{#if system.saves.fortitude.value}}__Fort__ {{numberFormat system.saves.fortitude.value sign=true}}, {{/if}}{{#if system.saves.reflex.value}}__Ref__ {{numberFormat system.saves.reflex.value sign=true}}, {{/if}}{{#if system.saves.will.value}}__Will__ {{numberFormat system.saves.will.value sign=true}}{{/if}}{{#if system.attributes.allSaves.value}}; {{system.attributes.allSaves.value}}{{/if}}"
 hp: {{system.attributes.hp.value}}
 health:
   - name: ""
