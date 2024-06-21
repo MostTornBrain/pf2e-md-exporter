@@ -61,12 +61,14 @@ abilities_top:
   - name: "Area"{{else}}{{#if system.target.value}}
   - name: "Targets"
 {{/if}}{{/if}}{{/if}}
+{{#if (or (or system.range.value system.area.value) system.target.value)}}
     desc: "{{#if system.range.value}}{{system.range.value}}{{/if~}}
 {{#if system.area~}}
 {{#if system.range.value}}; **Area** {{/if}}{{system.area.value}}-foot {{system.area.type}}
 {{~/if~}}
 {{#if system.target.value~}}
 {{#if system.range.value}}; **Targets** {{/if}}{{system.target.value}}{{/if~}}"
+{{/if~}}
 {{#if system.defense.save}}
   - name: "Defense"
     desc: "{{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}"
