@@ -34,20 +34,19 @@ abilities_top:
 {{#if system.traits.traditions}}
   - name: "Traditions"
     desc: "{{#each system.traits.traditions}}{{this}}{{ifThen @last "" ", "}}{{/each}}"
-{{/if~}}
-
-{{#unless actionGlyph}}  - name: "Cast"
-    desc: "{{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/unless}}
+{{/if}}
+{{#if (or (not actionGlyph) (or system.cost.value system.ritual.secondary.casters))}}
+  - name: "Cast"
+    desc: "{{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}
 {{~#if system.cost.value~}}
 ; **Cost** {{{system.cost.value}}}
 {{~/if~}}
 {{~#if system.ritual.secondary.casters~}}
 ; **Secondary Casters** {{system.ritual.secondary.casters}}
 {{~/if~}}
-{{#unless actionGlyph}}"
-{{/unless}}
-
-{{~#if system.ritual.primary.check}}
+"
+{{/if}}
+{{#if system.ritual.primary.check}}
   - name: "Primary Check"
     desc: "{{system.ritual.primary.check}}
 {{~/if~}}
