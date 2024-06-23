@@ -475,6 +475,10 @@ export function convertHtml(doc, html) {
         const genericPattern = /@(?:\w+)\[((?:[^[\]]|\[[^[\]]*\])*)\]\{([^}]*)\}/g
         markdown = markdown.replace(genericPattern, function(match, p1, p2) {
                                                         if (match.includes('@UUID')) {
+                                                            // Special handling for @UUID tags - they get processed later by the link handler
+                                                            return match;
+                                                        } else if (match.includes('@Actor')) {
+                                                            // Special handling for @Actor tags - they get processed later by the link handler
                                                             return match;
                                                         } else {
                                                             return `${p2}`;
