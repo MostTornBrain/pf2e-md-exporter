@@ -174,7 +174,10 @@ function dummyLink(target, label) {
 }
 
 function uuidFailSafe(target, label) {
-    if (!use_uuid_for_notename) {
+    //console.debug("Considering:", target);
+    if (/[/]/.test(target)) {
+        //console.debug("Target contains slashes - not a UUID. Skipping.");
+    } else if (!use_uuid_for_notename) {
         // Foundry's fromUuidSync() will thrown an error if the UUID 
         // document is only available via an async operation.
         // We can't resolve async function calls via a handlebar, so let's try another approach...
@@ -182,26 +185,31 @@ function uuidFailSafe(target, label) {
         // I discovered this function mentioned in foundry.js:
         // let {collection, documentId, documentType, embedded, doc} = foundry.utils.parseUuid(target);
 
-        // Get the UUID parts for the target - that can always be done synchronously.
-        let uuidParts = foundry.utils.parseUuid(target);
+        try {
+            // Get the UUID parts for the target - that can always be done synchronously.
+            let uuidParts = foundry.utils.parseUuid(target);
 
-        // Using the UUID parts information from the target, get the UUID of the target's parent
-        let parentUuid = uuidParts.collection.getUuid(uuidParts.documentId);
-        
-        // Now that we have the parent's UUID, get it in document form.
-        // In testing, it appears the parent can be fetched via a synchronoous operation, which is what we need.
-        let parentDoc = fromUuidSync(parentUuid);
+            // Using the UUID parts information from the target, get the UUID of the target's parent
+            let parentUuid = uuidParts.collection.getUuid(uuidParts.documentId);
+            
+            // Now that we have the parent's UUID, get it in document form.
+            // In testing, it appears the parent can be fetched via a synchronoous operation, which is what we need.
+            let parentDoc = fromUuidSync(parentUuid);
 
-        if (parentDoc) {
-            // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
-            let pack = game.packs.get(parentDoc.pack);
-            if (pack) {
-                // Slashes in the title aren't real paths and as part of the export become underscores
-                let fixed_title = pack.title.replaceAll('/', '_');
-                let result = `${fixed_title}/${parentDoc.name}/${label}`;
-                //console.log("Resolved URL:", result);
-                return formatLink(result, label, /*inline*/false);
+            if (parentDoc) {
+                // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+                let pack = game.packs.get(parentDoc.pack);
+                if (pack) {
+                    // Slashes in the title aren't real paths and as part of the export become underscores
+                    let fixed_title = pack.title.replaceAll('/', '_');
+                    let result = `${fixed_title}/${parentDoc.name}/${label}`;
+                    //console.log("Resolved URL:", result);
+                    return formatLink(result, label, /*inline*/false);
+                }
             }
+        } catch (error) {
+            // If we caught an error from the UUID lookup, just fall through and use the raw link.
+            // console.log("Welp...");
         }
         console.log("Ooops.... we fell through.  Unresolved URL: ", target);
     }
@@ -292,9 +300,15 @@ function convertMarkdownLinks(markdown, relativeTo) {
         let linkdoc;
         try {
             if (!label) label = doc.name;
-            linkdoc = fromUuidSync(target);
+
+            // If it might be a UUID, try to look it up
+            if (!/[/]/.test(target)) {
+                linkdoc = fromUuidSync(target);
+            } else {
+                return dummyLink(target, label);
+            }
         } catch (error) {
-            //console.log(`Unable to fetch label from Compendium for ${target}`, error);
+            //console.log(`Unable to fetch label from Compendium for [${target}]:[${label}]`, error);
             return uuidFailSafe(target, label);
         }
 
@@ -343,35 +357,65 @@ function convertMarkdownLinks(markdown, relativeTo) {
 function doMath(doc, formula) {
     //console.log(`doMath: ${formula}`);
     let result = ''; 
-    
+
     // Remove any outermost parens
     formula = formula.replace(/^\((.*)\)$/, '$1');
 
     // Replace any @item references with the item's level
+    // TODO: should I use Roll.replaceFormulaData() instead?
     let level = doc.level;
     formula = formula.replaceAll("(@item.level)", level);
     formula = formula.replaceAll("@item.level", level);
     formula = formula.replaceAll("(@item.rank)", level);
     formula = formula.replaceAll("@item.rank", level);
+    formula = formula.replaceAll("(@item.badge.value)", 1);
+    formula = formula.replaceAll("@item.badge.value", 1);
 
     // Replace any @actor references with 1 as that is how the
     // feat descriptions that use this syntax are generally written.
     formula = formula.replaceAll("(@actor.level)", 1);
     formula = formula.replaceAll("@actor.level", 1);
 
+    // Remove any trailing "# comment text" or "|damage type"
+    formula = formula.split('#')[0].trim();
+    formula = formula.split('|')[0].trim();
+
+    //console.log("   Revised formula:", formula);
+
+    // Remove any outermost braces
+    formula = formula.replace(/^\{(.*)\}$/, '$1');
+
     if (!formula.includes('d') && !formula.includes('D')) {
         // No dice, so just evaluate the expression
         result = Roll.safeEval(formula);
     } else {
         // There be dice in this expression - we need to do special parsing
+
+        // Get the formula preceding the `d`
+        let parts = formula.split(/[dD]/);
+        formula = parts[0];
+
+        // If we have no preceding number in front of the `d`, make it a 1.
+        if (formula == '') {
+            formula = '1';
+        }
+
+        // Wrap it in parens for easier Roll.safeEval() handling
+        if (!formula.includes('(')) {
+            formula = '(' + formula + ')';
+        } 
+
         let rollTerms = Roll.parse(formula);
+        //console.log("Terms:", rollTerms);
         for (let term of rollTerms) {
-            if (term instanceof ParentheticalTerm || term instanceof MathTerm) {
+            //console.log("term: ", term);
+            if (isNaN(Number(term))) {
                  result = result + Roll.safeEval(term.formula);
             } else {
                 result = result + term.formula;
             }
         }
+        result = result + 'd' + parts[1];
     }
 
     //console.log(`doMath: ${formula} = ${result}`);
@@ -507,12 +551,22 @@ export function convertHtml(doc, html) {
                                                             if (index == 0) {
                                                                 damageList = part;
                                                             } else {
-                                                                part = part.replace(/[()]/g, '');
+                                                                //console.log(" part:", part);
                                                                 let mathyPartIndex = part.indexOf('[');
                                                                 let mathyPart = part.substring(0,mathyPartIndex);
+                                                                // strip parens if unbalanced. 
+                                                                if ((mathyPart.includes('(') && !mathyPart.includes(')')) ||
+                                                                    (mathyPart.includes(')') && !mathyPart.includes('('))) {
+                                                                    mathyPart = mathyPart.replace(/[()]/g, ''); 
+                                                                }
                                                                 mathyPart = doMath(doc, mathyPart); 
                                                                 // Remove any more brackets from the remaining description
                                                                 let partDescription = part.substring(mathyPartIndex+1).replace(/[\[\]]/g, ' ');
+                                                                // strip any remaining parens if unbalanced. 
+                                                                if ((partDescription.includes('(') && !partDescription.includes(')')) ||
+                                                                    (partDescription.includes(')') && !partDescription.includes('('))) {
+                                                                        partDescription = partDescription.replace(/[()]/g, ''); 
+                                                                }
                                                                 damageList = damageList + ' + ' + mathyPart + ' ' + partDescription;
                                                             }
                                                         });
