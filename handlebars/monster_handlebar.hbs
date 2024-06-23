@@ -74,7 +74,7 @@ abilities_mid:
 attacks:
   - name: ""
 {{#each items}}{{#if (eq type "melee")}}
-  - name: "{{capitalize system.weaponType.value}}"
+  - name: "{{#if this.isRanged}}Ranged{{else}}Melee{{/if}}"
     desc: "`pf2:1` {{this.name}} {{numberFormat system.bonus.value sign=true}} ({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}})\n__Damage__ {{#each system.damageRolls}} {{{this.damage}}} {{this.damageType}}{{#if ../system.attackEffects.value}} plus {{../system.attackEffects.value}}{{/if}}{{/each}}"
 {{/if}}{{/each~}}
 {{#each items as |item|}}{{#if (eq item.type "spellcastingEntry")}}
