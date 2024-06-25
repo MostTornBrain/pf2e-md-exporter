@@ -10,6 +10,12 @@ tags:
   - trait/{{this}}
    {{/each}}
   - trait/{{system.traits.rarity}}
+  {{#if system.traits.traditions}}
+  {{#each system.traits.traditions}}
+  - tradition/{{this}}
+  {{/each}}
+  {{/if}}
+
 {{#if system.ritual}}
   - ritual
 {{/if~}}
