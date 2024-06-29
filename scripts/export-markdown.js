@@ -202,7 +202,8 @@ function uuidFailSafe(target, label) {
                 if (pack) {
                     // Slashes in the title aren't real paths and as part of the export become underscores
                     let fixed_title = pack.title.replaceAll('/', '_');
-                    let result = `${fixed_title}/${parentDoc.name}/${label}`;
+                    let doc_name = label.replaceAll('/', '_');
+                    let result = `${fixed_title}/${parentDoc.name}/${doc_name}`;
                     //console.log("Resolved URL:", result);
                     return formatLink(result, label, /*inline*/false);
                 }
@@ -211,7 +212,7 @@ function uuidFailSafe(target, label) {
             // If we caught an error from the UUID lookup, just fall through and use the raw link.
             // console.log("Welp...");
         }
-        console.log("Ooops.... we fell through.  Unresolved URL: ", target);
+        console.log("Ooops.... we fell through.  Unresolved URL: ", target, ":", label);
     }
     return dummyLink(target, label);
 }
@@ -245,10 +246,11 @@ function convertLinks(markdown, doc) {
 
         let linkdoc;
         try {
-            if (!label && !hash) label = doc.name;
-           linkdoc = fromUuidSync(target);
-         } catch (error) {
-            //console.log(`Unable to fetch label from Compendium for ${target}`, error);
+            //if (!label && !hash) label = doc.name;
+            linkdoc = fromUuidSync(target);
+            //console.log("Tried fromUuidSync:", target);
+        } catch (error) {
+            //console.log(`Unable to fetch label from Compendium for ${target}:${label}`, error);
             return uuidFailSafe(target, label);
         }
 
@@ -268,6 +270,9 @@ function convertLinks(markdown, doc) {
             }
         }
 
+        // If the target has a slash in the name, change it to an underscore since it isn't a real path.
+        result = result.replaceAll('/', '_');
+
         if (!use_uuid_for_notename) {
             // Append a 1 to the condition since the filename will have a 1 appended to it.
             if (SPECIAL_CONDITIONS.includes(result)) {
@@ -284,9 +289,9 @@ function convertLinks(markdown, doc) {
                 }
             }
         }
+        //console.log("Format Link: ", result, "label:", label);
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
     }
-    
     // First, localize any @Localize tags - as these might end up containing links, which need to get handled in the next step.
     const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
     markdown = markdown.replace(localizePattern, expandOneLocalize);
@@ -639,7 +644,10 @@ export function convertHtml(doc, html) {
         // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
         markdown = turndownService.turndown((convertLinks(markdown, doc))).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
-
+        
+        // Correct any escaped underscores that resulted from the turndown service
+        markdown = markdown.replaceAll("\\_", "_");
+        
         // Now convert file references
         const filepattern = /!\[\]\(([^)]*)\)/g;
         markdown = markdown.replaceAll(filepattern, replaceLinkedFile);    
