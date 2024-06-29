@@ -233,6 +233,16 @@ function convertLinks(markdown, doc) {
         // Ensure the target is in a UUID format.
         if (type !== "UUID") target = `${type}.${target}`
 
+        // If the UUID is a "relative path" UUID, get the parent UUID path of the existing doc and than append this UUID to it.
+        if (target.startsWith('.')) {
+            const lastIndex = doc.uuid.lastIndexOf('.');
+            let parentUUID = doc.uuid;  // If we don't get a match (which is unlikely to happen), use the current UUID as the parent as a last resort
+            if (lastIndex !== -1) {
+                parentUUID = doc.uuid.substring(0, lastIndex);
+            } 
+            target = parentUUID + target;
+        }
+
         let linkdoc;
         try {
             if (!label && !hash) label = doc.name;
