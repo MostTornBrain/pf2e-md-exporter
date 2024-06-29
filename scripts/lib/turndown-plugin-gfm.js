@@ -94,7 +94,7 @@ export var TurndownPluginGfmService = (function (exports) {
     // only return content if caption if the first node immediately after TABLE
     filter: 'caption',
     replacement: function (content, node) {
-      if (node.parentNode.nodeName === 'TABLE' && node.parentNode.childNodes[0] === node) return content
+      if (node.parentNode.nodeName === 'TABLE' && node.parentNode.childNodes[0] === node) return content + "\n \n"
       return ''
     }
   };
