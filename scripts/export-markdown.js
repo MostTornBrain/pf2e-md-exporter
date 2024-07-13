@@ -867,7 +867,7 @@ function setupTurndown() {
             );
           },
           replacement: function (content, node, options) {
-            return MOD_CONFIG.actionIcon(content, game.settings);
+             return MOD_CONFIG.actionIcon(content, game.settings);
           }
         });
 
@@ -948,7 +948,6 @@ async function convertHtmlAsync(doc, html) {
 // Unfortunately, handlebars don't run asynchronously, so I need a redundant version
 // of the HTML conversion code that is synchronous, which won't handle pulling in the contents of @Embed tags.    
 export function convertHtml(doc, html) {
-
     // console.log("Converting synchronously: ", html);
 
     setupTurndown();
@@ -1340,6 +1339,7 @@ async function onePackFolder(path, folder) {
 }
 
 export async function exportMarkdown(from, zipname) {
+    console.log(from);
 
     clearTemplateCache();
 
