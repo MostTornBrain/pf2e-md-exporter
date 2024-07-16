@@ -127,7 +127,21 @@ Hooks.once('ready', () => {
             filePicker: "text"
         })
     }
-    
+
+  Handlebars.registerHelper('me-actionIcon', function (value, fallback) {
+    const toCheck = value ? value : fallback;
+    // Return the action icon for the given action
+    switch (toCheck) {
+      case "1": return "⬻";
+      case "2": return "⬺";
+      case "3": return "⬽";
+      case "reaction": return "⬲";
+      case "free": return "⭓";
+      case "passive": return"";
+    }
+    return toCheck;
+  })
+
   Handlebars.registerHelper('me-trait', function (value) {
     // Convert a sluggified trait into its localized human-readable text
     let lookUpText = CONFIG.PF2E.npcAttackTraits[value];
@@ -207,6 +221,19 @@ Hooks.once('ready', () => {
     }
     return equipmentList;
   });
+
+  Handlebars.registerHelper('me-getItemsByType', function (items, type) {
+    return items.filter(i => i.type === type);
+  })
+
+  Handlebars.registerHelper('me-getAbilities', function(items, position) {
+    switch (position) {
+      case "top": return items.filter(i => i.system.category === "interaction" && (htmlToYaml(i.system.description.value) || i.system.actions.value));
+      case "mid": return items.filter(i => i.system.category === "defensive" && (htmlToYaml(i.system.description.value) || (i.system.actions.value || (i.system.actionType.value && i.system.actionType.value !== "passive"))));
+      case "bot": return items.filter(i => i.system.category === "offensive" && (htmlToYaml(i.system.description.value) || i.system.actions.value));
+    }
+    return items;
+  })
 
   Handlebars.registerHelper('me-getRituals', function (items, ) {
     // Return the list of ritual spells.
@@ -291,7 +318,7 @@ Hooks.once('ready', () => {
     return spell_names;
   });
 
-  Handlebars.registerHelper('me-HTMLtoYAML', function (text, context, options) {
+  const htmlToYaml = (text, context, options) => {
     if (text) {
 
       // First, check if this item is a reference to another entry. 
@@ -319,7 +346,8 @@ Hooks.once('ready', () => {
         .replaceAll('\\n\\n* * *\\n\\n', '\\n* * *\\n');
     }
     return text;
-  });
+  };
+  Handlebars.registerHelper('me-HTMLtoYAML', htmlToYaml);
 
   Handlebars.registerHelper('me-HTMLtoMarkdown', function (text, context) {
      if (text) {

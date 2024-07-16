@@ -7,8 +7,9 @@ noteType: pf2eMonster
 cssClasses: pf2e
 aliases: "{{{uuid}}}" 
 tags:
-{{#each system.traits.value}}  - pf2e/creature/type/{{this}}
-  {{/each}}
+{{#each system.traits.value}}
+  - pf2e/creature/type/{{this}}
+{{/each}}
   - pf2e/creature/level/{{system.details.level.value}}
 {{#if system.details.publication.remaster}}
   - remaster
@@ -20,77 +21,111 @@ license: {{system.details.publication.license}}
 ---
 
 ```statblock
-columns: 2
-forcecolumns: true
-layout: Basic Pathfinder 2e Layout
-{{#if this.img_path}}token: {{this.img_path}}
-{{/if}}source: "{{system.details.publication.title}}"
+layout: Experimental Pathfinder 2e Layout
+{{#if this.img_path}}
+token: {{this.img_path}}
+{{/if}}
+sourcebook: "{{system.details.publication.title}}"
 name: "{{{name}}}"
-level: "Creature {{system.details.level.value}}"
-{{#if (eq system.traits.rarity "common")}}{{else}}rare_03: "{{capitalize system.traits.rarity}}"{{/if}}
-alignment: "{{more-handlebars-helpers-table system.details.alignment.value "LG" "Lawful Good" "LN" "Lawful Neutral" "LE" "Lawful Evil" "NG" "Neutral Good" "N" "Neutral" "NE" "Neutral Evil" "CG" "Chaotic Good" "CN" "Chaotic Neutral" "CE" "Chaotic Evil"}}"
-size: "{{more-handlebars-helpers-table system.traits.size.value "ti" "Tiny" "sm" "Small" "med" "Medium" "lg" "Large" "hu" "Huge" "ga" "Gargantuan"}}"
-{{#each system.traits.value as |trait index|}}
-trait_0{{add index 1}}: "{{trait}}"
+level: Creature {{system.details.level.value}}
+rarity: {{system.traits.rarity}}
+alignment: {{more-handlebars-helpers-table system.details.alignment.value "LG" "Lawful Good" "LN" "Lawful Neutral" "LE" "Lawful Evil" "NG" "Neutral Good" "N" "Neutral" "NE" "Neutral Evil" "CG" "Chaotic Good" "CN" "Chaotic Neutral" "CE" "Chaotic Evil"}}
+size: {{more-handlebars-helpers-table system.traits.size.value "ti" "Tiny" "sm" "Small" "med" "Medium" "lg" "Large" "hu" "Huge" "ga" "Gargantuan"}}
+{{#if system.traits.value}}
+traits:
+{{#each system.traits.value as |trait|}}
+  - {{trait}}
 {{/each}} 
+{{/if}}
+
 modifier: {{system.perception.value}}
-perception:
-  - name: "Perception"
-    desc: "{{numberFormat system.perception.value sign=true}}; {{#each system.perception.senses as |sense|}}{{sense.label}}{{ifThen @last "" ", "}}{{/each}}"
+{{#if system.perception.senses}}
+senses: {{#each system.perception.senses as |sense|}}{{sense.label}}{{ifThen @last "" ", "}}{{/each}}
+{{/if}}
 {{#if (or system.details.languages.value system.details.languages.details)}}
 languages: "{{#each system.details.languages.value as |language|}}{{capitalize language}}{{ifThen @last "" ", "}}{{/each}}{{#if system.details.languages.details}}{{#if system.details.languages.value}}; {{/if}}{{system.details.languages.details}}{{/if}}"
 {{/if}}
+{{#if (me-getItemsByType items "lore")}}
 skills:
-  - name: "Skills"
-    desc: "{{#each items}}{{#if (eq type "lore")}}{{{name}}}: {{numberFormat system.mod.value sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/if}}{{/each}}"
+{{#each (me-getItemsByType items "lore")}}
+  - "{{{name}}}": {{#if system.variants.0.label}}"{{system.mod.value}} ({{system.variants.0.label}})"{{else}}{{system.mod.value}}{{/if}}
+{{/each}}
+{{/if}}
 abilityMods: [{{system.abilities.str.mod}}, {{system.abilities.dex.mod}}, {{system.abilities.con.mod}}, {{system.abilities.int.mod}}, {{system.abilities.wis.mod}}, {{system.abilities.cha.mod}}]
 speed: {{#if system.attributes.speed.value}}{{system.attributes.speed.value}} feet{{#if system.attributes.speed.otherSpeeds}}, {{/if}}{{/if}}{{#each system.attributes.speed.otherSpeeds}} {{type}} {{value}} feet{{ifThen @last "" ", "}}{{/each}}
-sourcebook: "_{{system.details.publication.title}}_"
+
 ac: {{system.attributes.ac.value}}
-armorclass:
-  - name: AC
-    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__ {{numberFormat system.saves.fortitude.value sign=true}}, __Ref__ {{numberFormat system.saves.reflex.value sign=true}}, __Will__ {{numberFormat system.saves.will.value sign=true}}{{#if system.attributes.allSaves.value}}; {{system.attributes.allSaves.value}}{{/if}}"
+{{#if system.attributes.ac.details}}
+acNote: {{system.attributes.ac.details}}
+{{/if}}
+saves:
+  - fort: {{system.saves.fortitude.value}}
+  - ref: {{system.saves.reflex.value}}
+  - will: {{system.saves.will.value}}
+{{#if system.attributes.allSaves.value}}
+savesNote: {{system.attributes.allSaves.value}}
+{{/if}}
 hp: {{system.attributes.hp.value}}
-health:
-  - name: ""
-  - name: HP
-    desc: "{{system.attributes.hp.value}}{{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.hardness.value}}; __Hardness__ {{system.attributes.hardness.value}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
-abilities_top:
-  - name: ""
+{{#if system.attributes.hp.details}}
+hpNote: {{system.attributes.hp.details}}
+{{/if}}
+{{#if system.attributes.hardness.value}}
+hardness: {{system.attributes.hardness.value}}
+{{/if}}
+{{#if system.attributes.immunities}}
+immunities: "{{#each system.attributes.immunities}}{{label}}{{ifThen @last "" ", "}}{{/each}}"
+{{/if}}
+{{#if system.attributes.weaknesses}}
+weaknesses: "{{#each system.attributes.weaknesses}}{{label}}{{ifThen @last "" ", "}}{{/each}}"
+{{/if}}
+{{#if system.attributes.resistances}}
+resistances: "{{#each system.attributes.resistances}}{{label}}{{ifThen @last "" ", "}}{{/each}}"
+{{/if}}
+
 {{#if (me-equipmentList items)}}
-  - name: "Items"
-    desc: "{{#each (me-equipmentList items)}}{{{this}}}{{ifThen @last '' ', '}}{{/each}}"
-{{~/if}}
-{{#each items}}{{#if (eq system.category "interaction")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
+items: "{{#each (me-equipmentList items)}}{{{this}}}{{ifThen @last '' ', '}}{{/each}}"
+{{/if}}
+
+{{#with (me-getAbilities items "top")}}
+abilities_top:
+{{#each this}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
-{{/if}}{{/if}}{{/each}}
+    desc: "{{#with (me-actionIcon system.actions.value system.actionType.value)}}{{this}} {{/with}}{{#if system.traits.value}}({{system.traits.value}}) {{/if}}{{{me-HTMLtoYAML system.description.value this}}}"
+{{/each}}{{/with~}}
+{{#with (me-getAbilities items "mid")}}
 abilities_mid:
-  - name: ""
-{{~#each items}}{{#if (eq system.category "defensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) (or system.actions.value (and system.actionType.value (ne system.actionType.value "passive"))))}}
+{{#each this}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
-{{/if}}{{/if}}{{/each}}
+    desc: "{{#with (me-actionIcon system.actions.value system.actionType.value)}}{{this}} {{/with}}{{#if system.traits.value}}({{system.traits.value}}) {{/if}}{{{me-HTMLtoYAML system.description.value this}}}"
+{{/each}}{{/with~}}
+{{#with (me-getAbilities items "bot")}}
+abilities_bot:
+{{#each this}}
+  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
+    desc: "{{#with (me-actionIcon system.actions.value system.actionType.value)}}{{this}} {{/with}}{{#if system.traits.value}}({{system.traits.value}}) {{/if}}{{{me-HTMLtoYAML system.description.value this}}}"
+{{/each}}{{/with~}}
+
+{{#with (me-getItemsByType items "melee")}}
 attacks:
-  - name: ""
-{{#each items}}{{#if (eq type "melee")}}
-  - name: "{{#if this.isRanged}}Ranged{{else}}Melee{{/if}}"
-    desc: "`pf2:1` {{this.name}} {{numberFormat system.bonus.value sign=true}} ({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}})\n__Damage__ {{#each system.damageRolls}} {{{this.damage}}} {{this.damageType}}{{#if ../system.attackEffects.value}} plus {{../system.attackEffects.value}}{{/if}}{{/each}}"
-{{/if}}{{/each~}}
-{{#each items as |item|}}{{#if (eq item.type "spellcastingEntry")}}
+{{#each this}}
+  - name: ___{{#if this.isRanged}}Ranged{{else}}Melee{{/if}}___ ⬻ {{name}}
+    bonus: {{system.bonus.value}}
+    desc: "({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}})"
+    damage: "{{#each system.damageRolls}}{{{damage}}} {{damageType}}{{#if ../system.attackEffects.value}} plus {{../system.attackEffects.value}}{{/if}}{{ifThen @last "" " "}}{{/each}}"
+{{/each}}{{/with}}
+
+{{~#if (or (me-getItemsByType items "spellcastingEntry") (me-getRituals items))}}
+spellcasting:
+{{#each (me-getItemsByType items "spellcastingEntry") as |item|}}
   - name: "{{item.name}}"
-    desc: "{{#if (eq item.system.prepared.value 'focus')}}{{@root.system.resources.focus.value}} Focus Point{{#if (gt @root.system.resources.focus.value 1)}}s{{/if}}, {{/if}}DC {{item.system.spelldc.dc}}, attack {{numberFormat item.system.spelldc.value sign=true}}
-    {{~#each (me-spellLevels @root.items item.id 'spells') as |level|}}; __{{ordinal level}} __ {{me-getSpellSlotCount item level}} {{#each (me-getSpellList @root.items item.id level 'spells')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}
-    {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{{this}}}_{{#if system.location.uses.value}} (x{{system.location.uses.value}}){{/if}}{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
-    {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{#if system.location.uses.value}} (x{{system.location.uses.value}}){{/if}}{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
-{{/if}}{{/each}}{{#if (me-getRituals items)}}
+    desc: "{{#if (eq item.system.prepared.value 'focus')}}{{@root.system.resources.focus.value}} Focus Point{{#if (gt @root.system.resources.focus.value 1)}}s{{/if}}, {{/if}}DC {{item.system.spelldc.dc}}, attack {{numberFormat item.system.spelldc.value sign=true}};
+      {{~#each (me-spellLevels @root.items item.id 'spells') as |level|}}__{{ordinal level}} __ {{me-getSpellSlotCount item level}} {{#each (me-getSpellList @root.items item.id level 'spells')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{ifThen @last '' '; '}}{{/each}}
+      {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{{this}}}_{{#if system.location.uses.value}} (x{{system.location.uses.value}}){{/if}}{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
+      {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{#if system.location.uses.value}} (x{{system.location.uses.value}}){{/if}}{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
+{{/each}}{{~#if (me-getRituals items)}}
   - name: "Rituals"
     desc: "{{#each (me-getRituals items)}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}"
-{{/if}}
-{{#each items}}{{#if (eq system.category "offensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
-  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if (eq system.actionType.value 'reaction')}}`pf2:r`{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
-{{/if}}{{/if}}{{/each}} 
+{{/if}}{{/if}}
 ```
 
 {{#if this.include_initiative}}
