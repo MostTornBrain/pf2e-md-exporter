@@ -26,6 +26,7 @@ let use_uuid_for_journal_folder=true;
 let use_uuid_for_notename=true;
 let export_tokens = false;
 let include_initiative_tracker = false;
+let export_traits = false;
 
 class DOCUMENT_ICON {
     // indexed by CONST.DOCUMENT_TYPES
@@ -993,6 +994,7 @@ export async function exportMarkdown(from, zipname) {
     use_uuid_for_notename       = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_NOTENAME_IS_UUID);
     export_tokens               = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_EXPORT_TOKENS);
     include_initiative_tracker  = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_INCLUDE_INITIATIVE);
+    export_traits               = game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_EXPORT_TRAITS);
 
     let noteid = ui.notifications.info(`${MODULE_NAME}.ProgressNotification`, {permanent: true, localize: true})
     // Wait for the notification to get drawn
@@ -1001,6 +1003,27 @@ export async function exportMarkdown(from, zipname) {
     zip = new JSZip();
 
     const TOP_PATH = "";
+
+    // Export all the traits as individual notes in a zz_traits folder
+    if (export_traits) {
+        for (const key in CONFIG.PF2E.traitsDescriptions) {
+            let traitDescription = game.i18n.localize(CONFIG.PF2E.traitsDescriptions[key]);
+            
+            // A few traits have @Check[] tags that should be turned into human readable text
+            const checkPattern = /@Check\[(?:type:)*([^\|\]]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
+            traitDescription = traitDescription.replace(checkPattern, function(match, p1, p2) {
+                                                            // Convert sluggified p1 to more friendly label
+                                                            p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
+                                                            if (p1 === "Flat") {
+                                                                return `DC ${p2} ${p1} check`;
+                                                            } else {
+                                                                return `DC ${p2} ${p1}`;
+                                                            } 
+                                                        });
+
+            zip.folder("zz_traits").file(`${key}.md`, traitDescription, { binary: false });
+        }
+    }
 
     if (from instanceof Folder) {
         console.debug(`Processing one Folder`)

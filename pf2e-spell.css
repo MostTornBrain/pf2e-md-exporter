@@ -79,7 +79,11 @@
     font-style: normal;
     display: inline-block;
     font-weight: 300;
-    pointer-events:none;
+    /* pointer-events:none;*/
+}
+
+.pf2e h3 a:hover {
+    background-color: var(--link-color) !important;
 }
 
 .pf2e h3 a.internal-link[title="Uncommon Rarity Trait"] {

@@ -55,6 +55,16 @@ Hooks.once('ready', () => {
 		config: true,
 	});
 
+
+  game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_EXPORT_TRAITS, {
+		name: "Export all traits as notes",
+		hint: "When checked, a collection of notes will be created for descriptions of all the traits in the system. Other notes can then link to these traits.",
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true,
+	});
+
     game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_INCLUDE_INITIATIVE, {
 		name: "Include Initiative Tracker markdown",
 		hint: "When checked, any monsters being exported will include markdown to support the Obsidian Initiative Tracker plugin.",
