@@ -5,3 +5,4 @@ export const OPTION_FOLDER_AS_UUID = "folderIsUuid";
 export const OPTION_NOTENAME_IS_UUID = "notenameIsUuid";
 export const OPTION_EXPORT_TOKENS = "exportTokens";
 export const OPTION_INCLUDE_INITIATIVE = "includeInitiative";
+export const OPTION_EXPORT_TRAITS = "exportTraits";
