@@ -26,10 +26,10 @@ layout: Basic Pathfinder 2e Layout
 source: "{{{system.details.publication.title}}}"
 name: "{{{name}}}"
 level: "Hazard {{system.details.level.value}}"
-{{#if system.traits.rarity}}{{else}}rare_03: "{{capitalize system.traits.rarity}}"{{/if}}
+{{#if system.traits.rarity}}{{else}}rare_03: [[{{capitalize system.traits.rarity}}]]{{/if}}
 {{#if system.details.isComplex}}trait_06: "Complex"{{/if}}
 {{#each system.traits.value as |trait index|}}
-trait_0{{add index 1}}: "{{trait}}"
+trait_0{{add index 1}}: [[{{trait}}]]
 {{/each}}
 modifier: {{system.attributes.stealth.value}}
 sourcebook: "_{{{system.details.publication.title}}}_"

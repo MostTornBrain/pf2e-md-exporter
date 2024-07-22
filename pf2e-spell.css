@@ -200,9 +200,9 @@
 }
 
 /* For Fantasy Statblocks so they better match remaster look */
- .line.trait_01, .line.trait_02, .line.trait_03, .line.trait_04, .line.trait_05, .line.trait_06, .line.trait_07,
+ .line[class*="trait_"],
  .line.alignment,.line.size,
- .line.rare_01, .line.rare_02, .line.rare_03, .line.rare_04 {
+ .line[class*="rare_"] {
     border-color: #d9c484;
     background-clip: border-box;
     border-style: solid;
@@ -212,3 +212,10 @@
     padding: 0.2em 0.4em 0.1em!important;
 }
 
+/* Make it so links within the trait line still look like traits */
+.line[class*="trait_"] a.internal-link,
+.line[class*="rare_"] a.internal-link {
+    text-transform: uppercase;
+    color: rgb(232, 232, 232) !important;
+    font-style: unset !important;
+}
