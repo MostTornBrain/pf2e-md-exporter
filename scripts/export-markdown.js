@@ -528,13 +528,21 @@ export function convertHtml(doc, html) {
                                                 }
                                               });
 
+        // Match things like: @Check[type:thievery|dc:20]{Thievery Skill Check}
+        // and turn it into: Dc 20 Thievery Skill Check
+        const checkPatternWithDesc = /@Check\[(?:type:)*([^\|\]]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]\{([^}]*)\}/g;
+        markdown = markdown.replace(checkPatternWithDesc, function(match, p1, p2, p3) {
+            return `DC ${p2} ${p3}`;
+        });
+
         // Convert @"Something" tags to plain text
         // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
         // Could be @Damage, @Template, @Check...
         // Just grab the plain text
         const genericPattern = /@(?:\w+)\[((?:[^[\]]|\[[^[\]]*\])*)\]\{([^}]*)\}/g
         markdown = markdown.replace(genericPattern, function(match, p1, p2) {
-                                                        if (match.includes('@UUID') || match.includes('@Actor') || match.includes('@Compendium')) {
+                                                        if (match.includes('@UUID') || match.includes('@Actor') || match.includes('@Compendium')
+                                                         || match.includes('@Item') || match.includes('@Macro')) {
                                                             // Let these drop through so they get processed as links later
                                                             return match;
                                                         } else {
