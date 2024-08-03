@@ -42,7 +42,7 @@ languages: "{{#each system.details.languages.value as |language|}}{{capitalize l
 {{/if}}
 skills:
   - name: "Skills"
-    desc: "{{#each items}}{{#if (eq type "lore")}}{{{name}}}: {{numberFormat system.mod.value sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/if}}{{/each}}"
+    desc: "{{#each (me-skillList system.skills)}}{{{label}}}: {{numberFormat totalModifier sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/each}}"
 abilityMods: [{{system.abilities.str.mod}}, {{system.abilities.dex.mod}}, {{system.abilities.con.mod}}, {{system.abilities.int.mod}}, {{system.abilities.wis.mod}}, {{system.abilities.cha.mod}}]
 speed: {{#if system.attributes.speed.value}}{{system.attributes.speed.value}} feet{{#if system.attributes.speed.otherSpeeds}}, {{/if}}{{/if}}{{#each system.attributes.speed.otherSpeeds}} {{type}} {{value}} feet{{ifThen @last "" ", "}}{{/each}}
 sourcebook: "_{{system.details.publication.title}}_"

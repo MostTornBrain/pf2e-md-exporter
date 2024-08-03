@@ -194,6 +194,16 @@ Hooks.once('ready', () => {
     return value;
   });
 
+  Handlebars.registerHelper('me-skillList', function(skills) {
+    let skillList = [];
+    for (let skill in skills) {
+      if (skills[skill].visible) {
+        skillList.push(skills[skill]);
+      }
+    }
+    return skillList;
+  });
+
   Handlebars.registerHelper('me-equipmentList', function (items) {
     // Return the list of items with the system.equipped property present.
     let equipmentList = [];
