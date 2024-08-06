@@ -741,15 +741,15 @@ async function oneRollTable(path, table) {
 }
 
 function oneScene(path, scene) {
-
-    const sceneBottom = scene.dimensions.sceneRect.bottom;
-    const sceneLeft   = scene.dimensions.sceneRect.left;
+    
+    const sceneBottom = scene.dimensions.sceneRect.y;
+    const sceneLeft   = scene.dimensions.sceneRect.x;
     const units_per_pixel = /*units*/ scene.grid.distance / /*pixels*/ scene.grid.size;
 
     function coord(pixels) {
         return pixels * units_per_pixel;
     }
-    function coord2(pixely, pixelx) { return `${coord(sceneBottom - pixely)}, ${coord(pixelx - sceneLeft)}` };
+    function coord2(pixely, pixelx) { return `${coord(scene.dimensions.sceneRect.height) - coord(pixely - sceneBottom)}, ${coord(pixelx - sceneLeft)}` };
 
     let markdown = frontmatter(scene);
 
@@ -778,7 +778,10 @@ function oneScene(path, scene) {
         `\n${MARKER}leaflet\n` +
         `id: ${scene.uuid}\n` +
         `bounds:\n    - [0, 0]\n    - [${coord(scene.dimensions.sceneRect.height)}, ${coord(scene.dimensions.sceneRect.width)}]\n` +
-        "defaultZoom: 2\n" +
+        "defaultZoom: 2.75\n" +
+        "minZoom: 2.5\n" +
+        "maxZoom: 6\n" +
+        "zoomDelta: 0.25\n" +
         `lat: ${coord(scene.dimensions.sceneRect.height/2)}\n` +
         `long: ${coord(scene.dimensions.sceneRect.width/2)}\n` +
         `height: 100%\n` +
