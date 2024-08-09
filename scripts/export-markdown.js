@@ -275,10 +275,12 @@ function convertLinks(markdown, doc) {
         result = result.replaceAll('/', '_');
 
         if (!use_uuid_for_notename) {
+            /* This appears to no longer be the case - the files don't have a 1 appended.
             // Append a 1 to the condition since the filename will have a 1 appended to it.
             if (SPECIAL_CONDITIONS.includes(result)) {
                 result = `${result} 1`;
             }
+            */
 
             if (linkdoc) {
                 // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
@@ -530,7 +532,7 @@ export function convertHtml(doc, html) {
 
         // Match things like: @Check[type:thievery|dc:20]{Thievery Skill Check}
         // and turn it into: Dc 20 Thievery Skill Check
-        const checkPatternWithDesc = /@Check\[(?:type:)*([^\|\]]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]\{([^}]*)\}/g;
+        const checkPatternWithDesc = /@Check\[(?:[^\]]*?\|)?type:([^\|\]]+)\|(?:[^\]]*?)dc:(\d+)(?:\|[^\]]*?)?\]\{([^}]*)\}/g;
         markdown = markdown.replace(checkPatternWithDesc, function(match, p1, p2, p3) {
             return `DC ${p2} ${p3}`;
         });
