@@ -9,6 +9,7 @@ aliases: "{{{uuid}}}"
 tags:
 {{#each system.traits.value}}  - pf2e/creature/type/{{this}}
   {{/each}}
+  - pf2eMonster
   - pf2e/creature/level/{{system.details.level.value}}
 {{#if system.details.publication.remaster}}
   - remaster

@@ -230,6 +230,37 @@ Hooks.once('ready', () => {
     return equipmentList;
   });
 
+  Handlebars.registerHelper('me-lootList', function (items) {
+    let lootList = [];
+    for (const item of items) {
+        let quantity = item.system.quantity ? item.system.quantity : 1;
+
+        let linkName = item?.flags?.core?.sourceId;
+        if (!linkName) {
+          linkName = item.name;
+        } else {
+          linkName = `[[${item.flags.core.sourceId}|${item.name}]]`;
+        }
+
+        const coinLabelHelper = Handlebars.helpers.coinLabel;
+        let value = coinLabelHelper(item.price.value);
+        value = value.scale(quantity);
+
+        let bulk = item.bulk.value;
+        if (bulk == 0.1) bulk = "L";
+        if (bulk == 0) bulk = "-";
+
+        lootList.push({
+          name: linkName,
+          type: item.type,
+          quantity: quantity,
+          bulk: bulk,
+          value: value
+        });
+    }
+    return lootList;
+  });
+
   Handlebars.registerHelper('me-getRituals', function (items, ) {
     // Return the list of ritual spells.
     let item;
