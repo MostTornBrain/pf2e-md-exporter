@@ -328,6 +328,7 @@ Hooks.once('ready', () => {
     for (const spell of spell_list) {
       // We don't want the 'constant' label on spells.
       let newName = spell.name.replace(' (Constant)', '');
+      let origName = spell.name.replace(/\s*\(.*?\)/g, ''); // Need for creating link to the spell document.
 
       // Append the number of uses to the spell name if it exists.
       const uses = spell.system?.location?.uses?.value;
@@ -337,7 +338,7 @@ Hooks.once('ready', () => {
       }
       
       // Revise the spell names so they are links to the referenced spells.
-      const fullName = `[[${spell.flags.core.sourceId}|${newName}]]`;
+      const fullName = `[[Spells/${origName}|${newName}]]`;
       spell_names.push(fullName);
     }
     
