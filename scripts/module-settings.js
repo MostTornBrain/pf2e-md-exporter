@@ -338,7 +338,12 @@ Hooks.once('ready', () => {
       }
       
       // Revise the spell names so they are links to the referenced spells.
-      const fullName = `[[Spells/${origName}|${newName}]]`;
+      // Check for sourceID, then compendiumSource, and as last resource use origName.
+      let linkName = spell.flags?.core?.sourceId;
+      if (!linkName) linkName = spell._stats?.compendiumSource;
+      if (!linkName) linkName = `Spells/${origName}`;
+
+      const fullName = `[[${linkName}|${newName}]]`;
       spell_names.push(fullName);
     }
     
