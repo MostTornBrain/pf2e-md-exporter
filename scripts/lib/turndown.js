@@ -79,13 +79,49 @@ export var TurndownService = (function () {
     )
   }
 
+  function callout_wrapper(text) {
+    return text
+    .split('\n')  // Split the input text into lines
+    .map(line => `> ${line}`)  // Prefix each line with "> "
+    .join('\n');  // Join the lines back into a single string
+  }
+
+  function callout_builder(content, node) {
+    var pclass = cleanAttribute(node.getAttribute('class'));
+    if (pclass) {
+      var callout_type = "info";
+      if (pclass.includes('narrative')) {
+        callout_type = "cite";
+      } else if (pclass.includes('encounter')) {
+        callout_type = "danger";
+      } else if (pclass.includes('treasure')) {
+        callout_type = "example";
+      }  else if (pclass.includes('creation') || pclass.includes('fvtt')) {
+        callout_type = "tip";
+      } else {
+        console.log("Unknown box text: ", pclass);
+      }
+
+      return '\n\n' + '> [!' + callout_type + '] # \n' + callout_wrapper(content) + '\n\n';
+    }
+    return '\n\n' + content + '\n\n';
+  }
+
   var rules = {};
 
   rules.paragraph = {
     filter: 'p',
 
-    replacement: function (content) {
-      return '\n\n' + content + '\n\n'
+    replacement: function (content, node) {
+      return callout_builder(content, node);
+    }
+  };
+
+  rules.section = {
+    filter: 'section',
+
+    replacement: function (content, node) {
+      return callout_builder(content, node);
     }
   };
 
@@ -332,7 +368,22 @@ export var TurndownService = (function () {
       var src = node.getAttribute('src') || '';
       var title = cleanAttribute(node.getAttribute('title'));
       var titlePart = title ? ' "' + title + '"' : '';
-      return src ? '![' + alt + ']' + '(' + src + titlePart + ')' : ''
+      var width = cleanAttribute(node.getAttribute('width'));
+      var height = cleanAttribute(node.getAttribute('height'));
+
+      if (width && height) {
+        alt = alt + '|left|' + width + 'x' + height;
+      } else if (width) {
+        alt = alt + '|left|' + width;
+      } else if (height) {
+        // There's no way in markdown to specify the height only.
+        // For now, use an ugly HTML hack.  Obsidian doesn't support <img> tags, but it does support <div>.
+        // TODO: to avoid using HTML, maybe use some routine to get the image dimensions so then the width scale would be known?
+        //       IS that worth the effort?
+        return src ? '<div style="float:left"><div src="' + src + '" class="internal-embed" height="' + height + '"></div></div>' : '';
+      }
+
+      return src ? '![' + alt +  ']' + '(' + src + titlePart + ')' : ''
     }
   };
 

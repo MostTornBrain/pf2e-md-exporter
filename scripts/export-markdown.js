@@ -139,7 +139,7 @@ function fileconvert(filename, label_or_size=null, inline=true) {
     return formatLink(filename, label_or_size, inline);
 }
 
-function replaceLinkedFile(str, filename) {
+function replaceLinkedFile(str, label, filename) {
     // For use by String().replaceAll,
     // Ensure we DON'T set the third parameter from a markdown link
     // See if we can grab the file.
@@ -152,7 +152,7 @@ function replaceLinkedFile(str, filename) {
         console.log(`Ignoring file/external URL in '${str}':\n${filename}`);
         return str;
     }
-    return fileconvert(filename);
+    return fileconvert(filename, label);
 }
 
 function notefilename(doc) {
@@ -304,7 +304,7 @@ function convertLinks(markdown, doc) {
     markdown = markdown.replace(pattern, replaceOneLink);
    
     // Replace file references (TBD AFTER HTML conversion)
-    const filepattern = /!\[\]\(([^)]*)\)/g;
+    const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
     markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
 
     return markdown;
@@ -419,7 +419,7 @@ function doMath(doc, formula) {
         }
 
         // Wrap it in parens for easier Roll.safeEval() handling
-        if (!formula.includes('(')) {
+        if (!formula.startsWith('(')) {
             formula = '(' + formula + ')';
         } 
 
@@ -660,8 +660,35 @@ export function convertHtml(doc, html) {
         markdown = markdown.replaceAll("\\_", "_");
         
         // Now convert file references
-        const filepattern = /!\[\]\(([^)]*)\)/g;
-        markdown = markdown.replaceAll(filepattern, replaceLinkedFile);    
+        const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
+        markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
+
+        // Look for <div style="float:left"><div src=" and include that link in the zip archive
+        // This will ensure images linked this way are included in the zip.
+        // (These happen from the custom turndown processing for "img" tags with only a height attribute)
+        const imgPattern = /<div style="float:left"><div src="([^"]*)"/g;
+        for (const match of markdown.matchAll(imgPattern)) {
+            const fullMatch = match[0];  // The full matched string, e.g., <div style="float:left"><div src="image1.png"
+            const srcReference = match[1];  // The captured group, e.g., "image1.png"
+
+            zip.folder(destForImages).file(srcReference, 
+                // Provide a Promise which JSZIP will wait for before saving the file.
+                // (Note that a CORS request will fail at this point.)
+                fetch(srcReference).then(resp => {
+                    if (resp.status !== 200) {
+                        console.error(`ConvertHTML: Failed to fetch file from '${srcReference}' (response ${resp.status})`)
+                        return new Blob();
+                    } else {
+                        console.debug(`ConvertHTML: Adding file ${srcReference}`);
+                        return resp.blob();
+                    }
+                }).catch(e => { 
+                    console.log(e);
+                    return new Blob();
+                }),
+            {binary:true});
+        }
+
     } catch (error) {
         console.warn(error);
         console.warn(`Error: failed to decode html:`, html)
