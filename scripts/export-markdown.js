@@ -218,10 +218,20 @@ function uuidFailSafe(target, label) {
     return dummyLink(target, label);
 }
 
-function convertLinks(markdown, doc) {
+// Unfortunately, we need two "convertLinks" functions, one Async and one Sync.
+// In order to process @Embed tags properly where we pull in the text from the 
+// @Embed referenced document, we need to perform this asynchronously as embedded
+// documents in PF2E are only available via async APIs. 
+// But, handlebars are always synchronous, hence the need for a second implementation.
+async function convertLinksAsync(markdown, doc) {
+
+    async function getDocumentDescription(target) {
+        const uuid = await fromUuid(target);
+        return uuid.system.description.value;
+    }
 
     // Needs to be nested so that we have access to 'doc'
-    function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
+    async function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
 
         // Some Foundry modules introduced adding "inline" to the start of type.
         let inline = type.startsWith("inline");
@@ -229,12 +239,27 @@ function convertLinks(markdown, doc) {
         // Maybe handle `@PDF` links properly too
 
         // Ignore link if it isn't one that we can parse.
-        const documentTypes = new Set(CONST.DOCUMENT_LINK_TYPES.concat(["Compendium", "UUID"]));
-        if (!documentTypes.has(type)) return str;
-        
-        // Ensure the target is in a UUID format.
-        if (type !== "UUID") target = `${type}.${target}`
+        const documentTypes = new Set(CONST.DOCUMENT_LINK_TYPES.concat(["Compendium", "UUID", "Embed"]));
+        if (!documentTypes.has(type)) {
+            console.log("Unhandled link type of: ", type, str);
+            return str;
+        }
 
+        // Ensure the target is in a UUID or Embed format.
+        if (type !== "UUID" && type != "Embed") {
+            console.log("Not a UUID nor an Embed:", type, target);
+            target = `${type}.${target}`
+        }
+
+        // Omit the trailing " inline..." stuff and just get the Embedded UUID path
+        if (type == "Embed") {
+            const detailMatch = target.match(/([^\]]+)\s(\w+)/);
+            if (detailMatch) {
+                const [_, compendiumPath, displayType] = detailMatch;
+                //console.log("Embed compendium:", compendiumPath);
+                target = compendiumPath;
+            }
+        }
         // If the UUID is a "relative path" UUID, get the parent UUID path of the existing doc and than append this UUID to it.
         if (target.startsWith('.')) {
             const lastIndex = doc.uuid.lastIndexOf('.');
@@ -256,7 +281,20 @@ function convertLinks(markdown, doc) {
         }
 
         if (!linkdoc) return dummyLink();
+
+        // Embeded tags need to be expanded inside the note.  
+        // Grab the text description and return it instead of returning a link.
+        if (type == "Embed") {
+            // Use the async function to get the resolved value
+            const description = await getDocumentDescription(target);
         
+            // Now you can use the resolved description
+            const taggedDesc = convertPF2ETags(doc, description);
+            const newDesc = convertLinks(taggedDesc, doc);
+            //console.log("NewDesc:", newDesc);
+            return newDesc;        
+        }
+
         // A journal with only one page is put into a Note using the name of the Journal, not the only Page.
         let filename = notefilename(linkdoc);
     
@@ -295,6 +333,129 @@ function convertLinks(markdown, doc) {
         //console.log("Format Link: ", result, "label:", label);
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
     }
+
+    async function replaceAllLinks(markdown) {
+        // Convert all the links
+        const pattern = /@([A-Za-z]+)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
+
+        // Find all matches
+        const matches = [...markdown.matchAll(pattern)];
+
+        // Replace each match asynchronously
+        for (const match of matches) {
+            const [fullMatch, type, link, hash, label] = match;
+            const replacement = await replaceOneLink(fullMatch, type, link, hash, label);
+            markdown = markdown.replace(fullMatch, replacement);
+        }
+        return markdown
+    }
+
+    // First, localize any @Localize tags - as these might end up containing links, which need to get handled in the next step.
+    const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
+    markdown = markdown.replace(localizePattern, expandOneLocalize);
+ 
+    markdown = await replaceAllLinks(markdown);
+    
+    // Replace file references (TBD AFTER HTML conversion)
+    const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
+    markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
+
+    return markdown;
+}
+
+function convertLinks(markdown, doc) {
+
+    // Needs to be nested so that we have access to 'doc'
+    function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
+
+        // Some Foundry modules introduced adding "inline" to the start of type.
+        let inline = type.startsWith("inline");
+        if (inline) type = type.slice("inline".length);
+        // Maybe handle `@PDF` links properly too
+
+        // Ignore link if it isn't one that we can parse.
+        const documentTypes = new Set(CONST.DOCUMENT_LINK_TYPES.concat(["Compendium", "UUID", "Embed"]));
+        if (!documentTypes.has(type)) {
+            console.log("Unhandled link type of: ", type, str);
+            return str;
+        }
+
+        // Ensure the target is in a UUID or Embed format.
+        if (type !== "UUID" && type != "Embed") {
+            console.log("Not a UUID nor an Embed:", type, target);
+            target = `${type}.${target}`
+        }
+
+        // Omit the trailing " inline..." stuff and just get the Embedded UUID path
+        if (type == "Embed") {
+            const detailMatch = target.match(/([^\]]+)\s(\w+)/);
+            if (detailMatch) {
+                const [_, compendiumPath, displayType] = detailMatch;
+                //console.log("Embed compendium:", compendiumPath);
+                target = compendiumPath;
+            }
+        }
+        // If the UUID is a "relative path" UUID, get the parent UUID path of the existing doc and than append this UUID to it.
+        if (target.startsWith('.')) {
+            const lastIndex = doc.uuid.lastIndexOf('.');
+            let parentUUID = doc.uuid;  // If we don't get a match (which is unlikely to happen), use the current UUID as the parent as a last resort
+            if (lastIndex !== -1) {
+                parentUUID = doc.uuid.substring(0, lastIndex);
+            } 
+            target = parentUUID + target;
+        }
+
+        let linkdoc;
+        try {
+            //if (!label && !hash) label = doc.name;
+            linkdoc = fromUuidSync(target);
+            //console.log("Tried fromUuidSync:", target);
+        } catch (error) {
+            //console.log(`Unable to fetch label from Compendium for ${target}:${label}`, error);
+            return uuidFailSafe(target, label);
+        }
+
+        if (!linkdoc) return dummyLink();
+
+        // A journal with only one page is put into a Note using the name of the Journal, not the only Page.
+        let filename = notefilename(linkdoc);
+    
+        // FOUNDRY uses slugified section names, rather than the actual text of the HTML header.
+        // So we need to look up the slug in the Journal Page's TOC.
+        let result = filename;
+        if (hash && linkdoc instanceof JournalEntryPage) {
+            const toc = linkdoc.toc;
+            if (toc[hash]) {
+                result += `#${toc[hash].text}`;
+                if (!label) label = toc[hash].text;
+            }
+        }
+
+        // If the target has a slash in the name, change it to an underscore since it isn't a real path.
+        result = result.replaceAll('/', '_');
+
+        if (!use_uuid_for_notename) {
+            /* This appears to no longer be the case - the files don't have a 1 appended.
+            // Append a 1 to the condition since the filename will have a 1 appended to it.
+            if (SPECIAL_CONDITIONS.includes(result)) {
+                result = `${result} 1`;
+            }
+            */
+
+            if (linkdoc) {
+                // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+                let pack = game.packs.get(linkdoc.pack);
+                if (pack) {
+                    // Slashes in the title aren't real paths and as part of the export become underscores
+                    let fixed_title = pack.title.replaceAll('/', '_');
+                    result = `${fixed_title}/${result}`;
+                }
+            }
+        }
+        //console.log("Format Link: ", result, "label:", label);
+        return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
+    }
+
     // First, localize any @Localize tags - as these might end up containing links, which need to get handled in the next step.
     const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
     markdown = markdown.replace(localizePattern, expandOneLocalize);
@@ -302,13 +463,14 @@ function convertLinks(markdown, doc) {
     // Convert all the links
     const pattern = /@([A-Za-z]+)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
     markdown = markdown.replace(pattern, replaceOneLink);
-   
+
     // Replace file references (TBD AFTER HTML conversion)
     const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
     markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
 
     return markdown;
 }
+
 
 function convertMarkdownLinks(markdown, relativeTo) {
 
@@ -440,7 +602,181 @@ function doMath(doc, formula) {
     return result;  
 }
 
-export function convertHtml(doc, html) {
+function convertPF2ETags(doc, html) {
+    // First, localize any @Localize tags - as these might end up containing links or other @tags, which need to get handled later.
+    const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
+    let markdown = html.replace(localizePattern, expandOneLocalize);
+
+    // Convert Foundry roll commands to plain text
+    // Format is [[/r (dice formula) description[sometext]]]{plain text}. 
+    //     We just want to grab the {plain text}
+    const roll2Pattern = /\[\[\/(?:[br]+)\s+(?:.*?)\]\]{(.*?)}/g;
+    markdown = markdown.replace(roll2Pattern, function(match, p1) {
+                                                return `${p1}`;
+                                            });
+
+    // Convert another style Foundry roll commands to plain text
+    // Format is [[/r (dice formula) description[sometext]]], 
+    //     where the "description" and [sometext] is optional
+    // The dice formula can contain a level reference as "@item.level".
+    const rollPattern = /\[\[\/(?:[br]+)\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
+    markdown = markdown.replace(rollPattern, function(match, p1, p2) {
+                                            let result = doMath(doc, p1);
+                                            if (p2 && p2 != 'healing' && !p2.includes('#')){
+                                                return `${result} ${p2.replace(/,/g, ' ')}`;
+                                            } else {
+                                                //  Strip anything after a # to handle this example: [[/br 1d4 #minutes]] 
+                                                // It gets matched by the above pattern as part of the die roll and 
+                                                // the regex is already hard to read. 
+                                                
+                                                // If result is a number return it
+                                                if (typeof result === 'number') {
+                                                    return result;
+                                                } else {
+                                                    return result.split('#')[0];
+                                                }
+                                            }
+                                            });
+
+    // Match things like: @Check[type:thievery|dc:20]{Thievery Skill Check}
+    // and turn it into: Dc 20 Thievery Skill Check
+    const checkPatternWithDesc = /@Check\[(?:[^\]]*?\|)?type:([^\|\]]+)\|(?:[^\]]*?)dc:(\d+)(?:\|[^\]]*?)?\]\{([^}]*)\}/g;
+    markdown = markdown.replace(checkPatternWithDesc, function(match, p1, p2, p3) {
+        return `DC ${p2} ${p3}`;
+    });
+
+    // Convert @"Something" tags to plain text
+    // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
+    // Could be @Damage, @Template, @Check...
+    // Just grab the plain text
+    const genericPattern = /@(?:\w+)\[((?:[^[\]]|\[[^[\]]*\])*)\]\{([^}]*)\}/g
+    markdown = markdown.replace(genericPattern, function(match, p1, p2) {
+                                                    if (match.includes('@UUID') || match.includes('@Actor') || match.includes('@Compendium')
+                                                        || match.includes('@Item') || match.includes('@Macro')) {
+                                                        // Let these drop through so they get processed as links later
+                                                        return match;
+                                                    } else {
+                                                        return `${p2}`;
+                                                    }
+                                                });
+
+    // Convert @Embed tags
+    const embedPattern = /@Embed\[((?:[^[\]]|\[[^[\]]*\])*)\]/g
+    markdown = markdown.replace(embedPattern, function(match, p1, p2) {
+                                                    // Let these drop through so they get processed as links later
+                                                    return match;
+                                                });
+
+
+    // Convert @Damage to plain text
+    // Format is @Damage[(2d6+4)[bludgeoning]]
+    // or        @Damage[(@item.level+1)d10[vitality]]
+    // This one has no descriptive text
+    const damagePattern = /@Damage\[([^\[\]]+)\[(.*?)\](?:\|.*?)*\]/g;
+    markdown = markdown.replace(damagePattern, function(match, p1, p2) {
+                                                    let result = doMath(doc, p1);
+                                                    if (result) {
+                                                        // Remove any wrapping parens
+                                                        result = `${result}`.replace(/^\(|\)$/g, "");
+                                                    }
+                                                    // If p2 has an @tag of the format "@xxx.flags.pf2e..."
+                                                    // remove that part of the string.
+                                                    if (p2.includes('@')) {
+                                                        p2 = p2.replace(/@.*?\.pf2e\.\S+/g, '');
+                                                    } 
+                                                    // Look for a list of damage rolls and convert each piece,
+                                                    // such as "acid],3d6[persistent,acid],(3[splash])[acid" (which comes from Generate Bomb in Alchemical Golem from Bestiary 1)
+                                                    let parts = p2.split('],');
+                                                    const subDamagePattern = /([^\[\]]+)(\[.*\])/;
+                                                    let damageList = '';
+                                                    parts.forEach((part, index) => {
+                                                        if (index == 0) {
+                                                            damageList = part;
+                                                        } else {
+                                                            //console.log(" part:", part);
+                                                            let mathyPartIndex = part.indexOf('[');
+                                                            let mathyPart = part.substring(0,mathyPartIndex);
+                                                            // strip parens if unbalanced. 
+                                                            if ((mathyPart.includes('(') && !mathyPart.includes(')')) ||
+                                                                (mathyPart.includes(')') && !mathyPart.includes('('))) {
+                                                                mathyPart = mathyPart.replace(/[()]/g, ''); 
+                                                            }
+                                                            mathyPart = doMath(doc, mathyPart); 
+                                                            // Remove any more brackets from the remaining description
+                                                            let partDescription = part.substring(mathyPartIndex+1).replace(/[\[\]]/g, ' ');
+                                                            // strip any remaining parens if unbalanced. 
+                                                            if ((partDescription.includes('(') && !partDescription.includes(')')) ||
+                                                                (partDescription.includes(')') && !partDescription.includes('('))) {
+                                                                    partDescription = partDescription.replace(/[()]/g, ''); 
+                                                            }
+                                                            damageList = damageList + ' + ' + mathyPart + ' ' + partDescription;
+                                                        }
+                                                    });
+                                                    
+                                                    return `${result} ${damageList.replace(/,/g, ' ')}`;
+                                                });
+
+    // Convert simple @Damager[2d4] to plain text
+    const damage2Pattern = /@Damage\[([^\[\]]+)\]/g;
+    markdown = markdown.replace(damage2Pattern, function(match, p1) {
+                                                    let result = doMath(doc, p1);
+                                                    if (result) {
+                                                        // Remove any wrapping parens
+                                                        result = `${result}`.replace(/^\(|\)$/g, "");
+                                                    }
+                                                    return result;
+                                                });
+                                        
+    // Convert @Template with no description to plain text
+    // Format is @Template[type:cone|distance:30]
+    // or @Template\[type:cone|distance:40|traits:arcane,evocation,fire,damaging-effect\]
+    const templatePattern = /@Template\[type:([^\|\]]+)\|distance:(\d+)(?:\|.*?)*\]/g;
+    markdown = markdown.replace(templatePattern, function(match, p1, p2) {
+                                                    return `${p2}-foot ${p1}`;
+                                                });
+
+    // Convert @Template without the label "type" and with no description to plain text
+    // Format is @Template[cone|distance:30]
+    // or @Template\[cone|distance:40|traits:arcane,evocation,fire,damaging-effect\]
+    const templatePattern2 = /@Template\[([^\|\]]+)\|distance:(\d+)(?:\|.*?)*\]/g;
+    markdown = markdown.replace(templatePattern2, function(match, p1, p2) {
+                                                    return `${p2}-foot ${p1}`;
+                                                });
+
+    // Convert @Check with no description to plain text
+    // Format is @Check[type:athletics|dc:15|traits:action:climb]
+    //        or @Check[type:athletics|traits:action:swim|dc:10]
+    //        or @Check[type:flat|dc:16]
+    //        or @Check[fortitude|dc:42]
+    // will be converted to "DC 15 Athletics"
+    const checkPattern = /@Check\[(?:type:)*([^\|\]]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
+    markdown = markdown.replace(checkPattern, function(match, p1, p2) {
+                                                    // Convert sluggified p1 to more friendly label
+                                                    p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
+                                                    return `DC ${p2} ${p1} check`;
+                                                });
+
+    // Convert @Check for "basic save" to plain text
+    // Format is @Check[type:reflex|dc:resolve(@actor.attributes.spellDC.value)|basic:true]
+    //        or @Check[type:astrology-lore]
+    //        or @Check[type:athletics|defense:reflex] 
+    // will be converted to "basic Reflex"
+    const checkBasicPattern = /@Check\[(?:type:)*([^\|\]]+)(?:\|.*?)*(\|basic:true)*\]/g;
+    markdown = markdown.replace(checkBasicPattern, function(match, p1, basic) {
+                                                    // Convert sluggified p1 to more friendly label
+                                                    p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
+
+                                                    if (basic) {
+                                                        return `basic ${p1} check`;
+                                                    } else {
+                                                        return `${p1} check`;
+                                                    }   
+                                                });
+
+    return markdown;
+}
+
+function setupTurndown() {
 
     // Foundry uses "showdown" rather than "turndown":
     // SHOWDOWN fails to parse tables at all
@@ -492,169 +828,25 @@ export function convertHtml(doc, html) {
         });
 
     }
+}
+
+// This code needs to be asynchronous so we can fetch @Embed documents
+async function convertHtmlAsync(doc, html) {
+
+    setupTurndown();
+
     let markdown;
     try {
-            
-        // First, localize any @Localize tags - as these might end up containing links or other @tags, which need to get handled later.
-        const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
-        markdown = html.replace(localizePattern, expandOneLocalize);
-    
-        // Convert Foundry roll commands to plain text
-        // Format is [[/r (dice formula) description[sometext]]]{plain text}. 
-        //     We just want to grab the {plain text}
-        const roll2Pattern = /\[\[\/(?:[br]+)\s+(?:.*?)\]\]{(.*?)}/g;
-        markdown = markdown.replace(roll2Pattern, function(match, p1) {
-                                                    return `${p1}`;
-                                              });
-
-        // Convert another style Foundry roll commands to plain text
-        // Format is [[/r (dice formula) description[sometext]]], 
-        //     where the "description" and [sometext] is optional
-        // The dice formula can contain a level reference as "@item.level".
-        const rollPattern = /\[\[\/(?:[br]+)\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
-        markdown = markdown.replace(rollPattern, function(match, p1, p2) {
-                                               let result = doMath(doc, p1);
-                                               if (p2 && p2 != 'healing' && !p2.includes('#')){
-                                                    return `${result} ${p2.replace(/,/g, ' ')}`;
-                                                } else {
-                                                    //  Strip anything after a # to handle this example: [[/br 1d4 #minutes]] 
-                                                    // It gets matched by the above pattern as part of the die roll and 
-                                                    // the regex is already hard to read. 
-                                                    
-                                                    // If result is a number return it
-                                                    if (typeof result === 'number') {
-                                                        return result;
-                                                    } else {
-                                                        return result.split('#')[0];
-                                                    }
-                                                }
-                                              });
-
-        // Match things like: @Check[type:thievery|dc:20]{Thievery Skill Check}
-        // and turn it into: Dc 20 Thievery Skill Check
-        const checkPatternWithDesc = /@Check\[(?:[^\]]*?\|)?type:([^\|\]]+)\|(?:[^\]]*?)dc:(\d+)(?:\|[^\]]*?)?\]\{([^}]*)\}/g;
-        markdown = markdown.replace(checkPatternWithDesc, function(match, p1, p2, p3) {
-            return `DC ${p2} ${p3}`;
-        });
-
-        // Convert @"Something" tags to plain text
-        // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
-        // Could be @Damage, @Template, @Check...
-        // Just grab the plain text
-        const genericPattern = /@(?:\w+)\[((?:[^[\]]|\[[^[\]]*\])*)\]\{([^}]*)\}/g
-        markdown = markdown.replace(genericPattern, function(match, p1, p2) {
-                                                        if (match.includes('@UUID') || match.includes('@Actor') || match.includes('@Compendium')
-                                                         || match.includes('@Item') || match.includes('@Macro')) {
-                                                            // Let these drop through so they get processed as links later
-                                                            return match;
-                                                        } else {
-                                                            return `${p2}`;
-                                                        }
-                                                    });
-
-        // Convert @Damage to plain text
-        // Format is @Damage[(2d6+4)[bludgeoning]]
-        // or        @Damage[(@item.level+1)d10[vitality]]
-        // This one has no descriptive text
-        const damagePattern = /@Damage\[([^\[\]]+)\[(.*?)\](?:\|.*?)*\]/g;
-        markdown = markdown.replace(damagePattern, function(match, p1, p2) {
-                                                        let result = doMath(doc, p1);
-                                                        if (result) {
-                                                            // Remove any wrapping parens
-                                                            result = `${result}`.replace(/^\(|\)$/g, "");
-                                                        }
-                                                        // If p2 has an @tag of the format "@xxx.flags.pf2e..."
-                                                        // remove that part of the string.
-                                                        if (p2.includes('@')) {
-                                                            p2 = p2.replace(/@.*?\.pf2e\.\S+/g, '');
-                                                        } 
-                                                        // Look for a list of damage rolls and convert each piece,
-                                                        // such as "acid],3d6[persistent,acid],(3[splash])[acid" (which comes from Generate Bomb in Alchemical Golem from Bestiary 1)
-                                                        let parts = p2.split('],');
-                                                        const subDamagePattern = /([^\[\]]+)(\[.*\])/;
-                                                        let damageList = '';
-                                                        parts.forEach((part, index) => {
-                                                            if (index == 0) {
-                                                                damageList = part;
-                                                            } else {
-                                                                //console.log(" part:", part);
-                                                                let mathyPartIndex = part.indexOf('[');
-                                                                let mathyPart = part.substring(0,mathyPartIndex);
-                                                                // strip parens if unbalanced. 
-                                                                if ((mathyPart.includes('(') && !mathyPart.includes(')')) ||
-                                                                    (mathyPart.includes(')') && !mathyPart.includes('('))) {
-                                                                    mathyPart = mathyPart.replace(/[()]/g, ''); 
-                                                                }
-                                                                mathyPart = doMath(doc, mathyPart); 
-                                                                // Remove any more brackets from the remaining description
-                                                                let partDescription = part.substring(mathyPartIndex+1).replace(/[\[\]]/g, ' ');
-                                                                // strip any remaining parens if unbalanced. 
-                                                                if ((partDescription.includes('(') && !partDescription.includes(')')) ||
-                                                                    (partDescription.includes(')') && !partDescription.includes('('))) {
-                                                                        partDescription = partDescription.replace(/[()]/g, ''); 
-                                                                }
-                                                                damageList = damageList + ' + ' + mathyPart + ' ' + partDescription;
-                                                            }
-                                                        });
-                                                        
-                                                        return `${result} ${damageList.replace(/,/g, ' ')}`;
-                                                    });
-
-        // Convert simple @Damager[2d4] to plain text
-        const damage2Pattern = /@Damage\[([^\[\]]+)\]/g;
-        markdown = markdown.replace(damage2Pattern, function(match, p1) {
-                                                        let result = doMath(doc, p1);
-                                                        if (result) {
-                                                            // Remove any wrapping parens
-                                                            result = `${result}`.replace(/^\(|\)$/g, "");
-                                                        }
-                                                        return result;
-                                                    });
-                                            
-        // Convert @Template with no description to plain text
-        // Format is @Template[type:cone|distance:30]
-        // or @Template\[type:cone|distance:40|traits:arcane,evocation,fire,damaging-effect\]
-        const templatePattern = /@Template\[type:([^\|\]]+)\|distance:(\d+)(?:\|.*?)*\]/g;
-        markdown = markdown.replace(templatePattern, function(match, p1, p2) {
-                                                        return `${p2}-foot ${p1}`;
-                                                    });
-
-        // Convert @Check with no description to plain text
-        // Format is @Check[type:athletics|dc:15|traits:action:climb]
-        //        or @Check[type:athletics|traits:action:swim|dc:10]
-        //        or @Check[type:flat|dc:16]
-        //        or @Check[fortitude|dc:42]
-        // will be converted to "DC 15 Athletics"
-        const checkPattern = /@Check\[(?:type:)*([^\|\]]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
-        markdown = markdown.replace(checkPattern, function(match, p1, p2) {
-                                                        // Convert sluggified p1 to more friendly label
-                                                        p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
-                                                        return `DC ${p2} ${p1} check`;
-                                                    });
-
-        // Convert @Check for "basic save" to plain text
-        // Format is @Check[type:reflex|dc:resolve(@actor.attributes.spellDC.value)|basic:true]
-        //        or @Check[type:astrology-lore]
-        //        or @Check[type:athletics|defense:reflex] 
-        // will be converted to "basic Reflex"
-        const checkBasicPattern = /@Check\[(?:type:)*([^\|\]]+)(?:\|.*?)*(\|basic:true)*\]/g;
-        markdown = markdown.replace(checkBasicPattern, function(match, p1, basic) {
-                                                        // Convert sluggified p1 to more friendly label
-                                                        p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
-
-                                                        if (basic) {
-                                                            return `basic ${p1} check`;
-                                                        } else {
-                                                            return `${p1} check`;
-                                                        }   
-                                                    });
+        markdown = convertPF2ETags(doc,html);
 
         // Add an extra line break before a table so markdown renders it correctly:
         markdown = markdown.replaceAll("<table", "\n<br/>\n<table");
 
         // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
+        markdown = await convertLinksAsync(markdown, doc);
+
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
-        markdown = turndownService.turndown((convertLinks(markdown, doc))).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
+        markdown = turndownService.turndown(markdown).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
         
         // Correct any escaped underscores that resulted from the turndown service
         markdown = markdown.replaceAll("\\_", "_");
@@ -697,6 +889,67 @@ export function convertHtml(doc, html) {
     return markdown;
 }
 
+
+// Unfortunately, handlebars don't run asynchronously, so I need a redundant version
+// of the HTML conversion code that is synchronous, which won't handle pulling in the contents of @Embed tags.    
+export function convertHtml(doc, html) {
+    setupTurndown();
+
+    let markdown;
+    try {
+        markdown = convertPF2ETags(doc,html);
+
+        // Add an extra line break before a table so markdown renders it correctly:
+        markdown = markdown.replaceAll("<table", "\n<br/>\n<table");
+
+        // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
+        markdown = convertLinks(markdown, doc);
+
+        // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
+        markdown = turndownService.turndown(markdown).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
+        
+        // Correct any escaped underscores that resulted from the turndown service
+        markdown = markdown.replaceAll("\\_", "_");
+        
+        // Now convert file references
+        const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
+        markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
+
+        // Look for <div style="float:left"><div src=" and include that link in the zip archive
+        // This will ensure images linked this way are included in the zip.
+        // (These happen from the custom turndown processing for "img" tags with only a height attribute)
+        const imgPattern = /<div style="float:left"><div src="([^"]*)"/g;
+        for (const match of markdown.matchAll(imgPattern)) {
+            const fullMatch = match[0];  // The full matched string, e.g., <div style="float:left"><div src="image1.png"
+            const srcReference = match[1];  // The captured group, e.g., "image1.png"
+
+            zip.folder(destForImages).file(srcReference, 
+                // Provide a Promise which JSZIP will wait for before saving the file.
+                // (Note that a CORS request will fail at this point.)
+                fetch(srcReference).then(resp => {
+                    if (resp.status !== 200) {
+                        console.error(`ConvertHTML: Failed to fetch file from '${srcReference}' (response ${resp.status})`)
+                        return new Blob();
+                    } else {
+                        console.debug(`ConvertHTML: Adding file ${srcReference}`);
+                        return resp.blob();
+                    }
+                }).catch(e => { 
+                    console.log(e);
+                    return new Blob();
+                }),
+            {binary:true});
+        }
+
+    } catch (error) {
+        console.warn(error);
+        console.warn(`Error: failed to decode html:`, html)
+    }
+
+    return markdown;
+}
+
+
 function frontmatter(doc, showheader=true) {
     let header = showheader ? `\n# ${doc.name}\n` : "";
     return FRONTMATTER + 
@@ -710,7 +963,7 @@ function frontmatter(doc, showheader=true) {
 }
 
 
-function oneJournal(path, journal) {
+async function oneJournal(path, journal) {
     let subpath = path;
     if (journal.pages.size > 1) {
         // Put all the notes in a sub-folder
@@ -731,7 +984,7 @@ function oneJournal(path, journal) {
             case "text":
                 switch (page.text.format) {
                     case 1: // HTML
-                        markdown = convertHtml(page, page.text.content);
+                        markdown = await convertHtmlAsync(page, page.text.content);
                         break;
                     case 2: // MARKDOWN
                         markdown = page.text.markdown;
@@ -762,7 +1015,7 @@ async function oneRollTable(path, table) {
     for (const tableresult of table.results) {
         const range  = (tableresult.range[0] == tableresult.range[1]) ? tableresult.range[0] : `${tableresult.range[0]}-${tableresult.range[1]}`;
         // Escape the "|" in any links
-        markdown += `| ${range} | ${(await convertHtml(table, tableresult.getChatText())).replaceAll("|","\\|")} |\n`;
+        markdown += `| ${range} | ${(await convertHtmlAsync(table, tableresult.getChatText())).replaceAll("|","\\|")} |\n`;
     }
 
     // No path for tables
@@ -894,7 +1147,7 @@ async function documentToJSON(path, doc) {
     ]
     for (const field of DESCRIPTIONS) {
         let text = foundry.utils.getProperty(doc, field);
-        if (text) markdown += convertHtml(doc, text) + EOL + EOL;
+        if (text) markdown += await convertHtmlAsync(doc, text) + EOL + EOL;
     }
 
     let datastring;
@@ -958,7 +1211,7 @@ async function maybeTemplate(path, doc) {
 
 async function oneDocument(path, doc) {
     if (doc instanceof JournalEntry)
-        oneJournal(path, doc);
+        await oneJournal(path, doc);
     else if (doc instanceof RollTable)
         await oneRollTable(path, doc);
     else if (doc instanceof Scene && game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_LEAFLET))
@@ -980,7 +1233,7 @@ async function oneChatMessage(path, message) {
     if (!html?.length) return message.export();
 
     return `## ${new Date(message.timestamp).toLocaleString()}\n\n` + 
-        convertHtml(message, html[0].outerHTML);
+        await convertHtmlAsync(message, html[0].outerHTML);
 }
 
 async function oneChatLog(path, chatlog) {
