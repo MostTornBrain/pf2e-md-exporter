@@ -523,7 +523,13 @@ function convertMarkdownLinks(markdown, relativeTo) {
     return markdown;
 }
 
-
+function stripUnbalancedLeftParen(input) {
+    // Check if the string starts with '(' and is unbalanced
+    if (input.startsWith('(') && input.split('(').length > input.split(')').length) {
+        return input.slice(1); // Remove the first character
+    }
+    return input; // Return the original string if no unbalanced '('
+}
 
 // Evaluate a math formula to turn it into a number.
 // This is designed to resolve things that reference ceil() or floor()
@@ -535,7 +541,9 @@ function convertMarkdownLinks(markdown, relativeTo) {
  * @returns {number|string} - The result of the calculation or "MATH_ERROR" if an error occurs.
  */
 function doMath(doc, formula) {
+    formula = stripUnbalancedLeftParen(formula);
     //console.log(`doMath: ${formula}`);
+
     let result = ''; 
 
     // Remove any outermost parens
@@ -600,6 +608,21 @@ function doMath(doc, formula) {
 
     //console.log(`doMath: ${formula} = ${result}`);
     return result;  
+}
+
+// Fix some weirdness with @damage rolls that have notation like (2[splash])[sonic]) where
+// the "splash" is redundant since it is also in the text description.
+function stripUnbalancedLeftBracket(input) {
+    // Check if there is an unblaance number of [ in the string
+    const leftBracketCount = input.split('[').length - 1;
+    if (leftBracketCount % 2 == 1) {
+        // Find the position of the right  '['
+        const unbalancedIndex = input.indexOf('[');
+        if (unbalancedIndex !== -1) {
+            return input.slice(unbalancedIndex + 1); // Remove everything up to and including the first '['
+        }
+    }
+    return input; // Return the original string if no unbalanced '[' is found
 }
 
 function convertPF2ETags(doc, html) {
@@ -690,10 +713,11 @@ function convertPF2ETags(doc, html) {
                                                     const subDamagePattern = /([^\[\]]+)(\[.*\])/;
                                                     let damageList = '';
                                                     parts.forEach((part, index) => {
+                                                        // console.log("part: ", part, " index:", index);
                                                         if (index == 0) {
                                                             damageList = part;
+                                                            damageList = stripUnbalancedLeftBracket(damageList);
                                                         } else {
-                                                            //console.log(" part:", part);
                                                             let mathyPartIndex = part.indexOf('[');
                                                             let mathyPart = part.substring(0,mathyPartIndex);
                                                             // strip parens if unbalanced. 
@@ -712,7 +736,7 @@ function convertPF2ETags(doc, html) {
                                                             damageList = damageList + ' + ' + mathyPart + ' ' + partDescription;
                                                         }
                                                     });
-                                                    
+                                                    // console.log("damagelist:", damageList);
                                                     return `${result} ${damageList.replace(/,/g, ' ')}`;
                                                 });
 
