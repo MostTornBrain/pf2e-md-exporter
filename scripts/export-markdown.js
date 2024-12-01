@@ -253,9 +253,9 @@ async function convertLinksAsync(markdown, doc) {
 
         // Omit the trailing " inline..." stuff and just get the Embedded UUID path
         if (type == "Embed") {
-            const detailMatch = target.match(/([^\]]+)\s(\w+)/);
-            if (detailMatch) {
-                const [_, compendiumPath, displayType] = detailMatch;
+            //console.log("target: ", target);
+            const compendiumPath = target.split(" inline")[0];
+            if (compendiumPath) {
                 //console.log("Embed compendium:", compendiumPath);
                 target = compendiumPath;
             }
@@ -288,6 +288,10 @@ async function convertLinksAsync(markdown, doc) {
             // Use the async function to get the resolved value
             const description = await getDocumentDescription(target);
         
+            if (!description) {
+                console.log("Failed to fetch embedded doc: ", target);
+            }
+
             // Now you can use the resolved description
             const taggedDesc = convertPF2ETags(doc, description);
             const newDesc = convertLinks(taggedDesc, doc);
@@ -668,6 +672,14 @@ function convertPF2ETags(doc, html) {
         return `DC ${p2} ${p3}`;
     });
 
+
+    // Convert @Embed tags
+    const embedPattern = /@Embed\[((?:[^[\]]|\[[^[\]]*\])*)\]/g
+    markdown = markdown.replace(embedPattern, function(match, p1, p2) {
+                                                    // Let these drop through so they get processed as links later
+                                                    return match;
+                                                });
+
     // Convert @"Something" tags to plain text
     // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
     // Could be @Damage, @Template, @Check...
@@ -682,14 +694,6 @@ function convertPF2ETags(doc, html) {
                                                         return `${p2}`;
                                                     }
                                                 });
-
-    // Convert @Embed tags
-    const embedPattern = /@Embed\[((?:[^[\]]|\[[^[\]]*\])*)\]/g
-    markdown = markdown.replace(embedPattern, function(match, p1, p2) {
-                                                    // Let these drop through so they get processed as links later
-                                                    return match;
-                                                });
-
 
     // Convert @Damage to plain text
     // Format is @Damage[(2d6+4)[bludgeoning]]
@@ -856,6 +860,8 @@ function setupTurndown() {
 
 // This code needs to be asynchronous so we can fetch @Embed documents
 async function convertHtmlAsync(doc, html) {
+
+    //console.log("Converting: ", html);
 
     setupTurndown();
 
