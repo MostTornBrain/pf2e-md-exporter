@@ -386,15 +386,15 @@ function convertLinks(markdown, doc) {
 
         // Ensure the target is in a UUID or Embed format.
         if (type !== "UUID" && type != "Embed") {
-            console.log("Not a UUID nor an Embed:", type, target);
+            // console.log("Not a UUID nor an Embed:", type, target);
             target = `${type}.${target}`
         }
 
         // Omit the trailing " inline..." stuff and just get the Embedded UUID path
         if (type == "Embed") {
-            const detailMatch = target.match(/([^\]]+)\s(\w+)/);
-            if (detailMatch) {
-                const [_, compendiumPath, displayType] = detailMatch;
+            //console.log("target: ", target);
+            const compendiumPath = target.split(" inline")[0];
+            if (compendiumPath) {
                 //console.log("Embed compendium:", compendiumPath);
                 target = compendiumPath;
             }

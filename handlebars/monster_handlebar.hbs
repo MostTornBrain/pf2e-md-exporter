@@ -63,13 +63,13 @@ abilities_top:
     desc: "{{#each (me-equipmentList items)}}{{{this}}}{{ifThen @last '' ', '}}{{/each}}"
 {{~/if}}
 {{#each items}}{{#if (eq system.category "interaction")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
-  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
+  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{#if _stats.compendiumSource}}[[{{_stats.compendiumSource}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}{{/if}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}}
 abilities_mid:
   - name: ""
 {{~#each items}}{{#if (eq system.category "defensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) (or system.actions.value (and system.actionType.value (ne system.actionType.value "passive"))))}}
-  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
+  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{#if _stats.compendiumSource}}[[{{_stats.compendiumSource}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}{{/if}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}}
 attacks:
