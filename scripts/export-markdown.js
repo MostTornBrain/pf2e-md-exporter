@@ -247,7 +247,7 @@ async function convertLinksAsync(markdown, doc) {
 
         // Ensure the target is in a UUID or Embed format.
         if (type !== "UUID" && type != "Embed") {
-            console.log("Not a UUID nor an Embed:", type, target);
+            // console.log("Not a UUID nor an Embed:", type, target);
             target = `${type}.${target}`
         }
 
@@ -861,7 +861,7 @@ function setupTurndown() {
 // This code needs to be asynchronous so we can fetch @Embed documents
 async function convertHtmlAsync(doc, html) {
 
-    //console.log("Converting: ", html);
+    // console.log("Converting: ", html);
 
     setupTurndown();
 
@@ -923,6 +923,9 @@ async function convertHtmlAsync(doc, html) {
 // Unfortunately, handlebars don't run asynchronously, so I need a redundant version
 // of the HTML conversion code that is synchronous, which won't handle pulling in the contents of @Embed tags.    
 export function convertHtml(doc, html) {
+
+    // console.log("Converting synchronously: ", html);
+
     setupTurndown();
 
     let markdown;
