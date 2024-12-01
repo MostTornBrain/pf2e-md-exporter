@@ -215,7 +215,12 @@ Hooks.once('ready', () => {
 
         let linkName = item?.flags?.core?.sourceId;
         if (!linkName) {
-          linkName = item.name;
+          linkName = item?._stats?.compendiumSource;
+          if (!linkName) {
+            linkName = item.name;
+          } else {
+            linkName = `[[${item._stats.compendiumSource}|${item.name}]]`;
+          }
         } else {
           linkName = `[[${item.flags.core.sourceId}|${item.name}]]`;
         }
