@@ -98,8 +98,9 @@ export var TurndownService = (function () {
         callout_type = "example";
       }  else if (pclass.includes('creation') || pclass.includes('fvtt')) {
         callout_type = "tip";
-      } else {
+      } else if (!pclass.includes('info')) {
         console.log("Unknown box text: ", pclass);
+        return '\n\n' + content + '\n\n';
       }
 
       return '\n\n' + '> [!' + callout_type + '] # \n' + callout_wrapper(content) + '\n\n';
