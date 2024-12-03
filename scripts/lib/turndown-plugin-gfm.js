@@ -76,10 +76,22 @@ export var TurndownPluginGfmService = (function (exports) {
       return node.nodeName === 'TABLE' && !isNestedTable(node)
     },
 
-    replacement: function (content) {
+    replacement: function (content, node) {
       // Ensure there are no blank lines
-      content = content.replace('\n\n', '\n');
-      return '\n\n' + content + '\n\n'
+      content = content.replace(/\n+/g, '\n')
+  
+      // If table has no heading, add an empty one so as to get a valid Markdown table
+      var secondLine = content.trim().split('\n');
+      if (secondLine.length >= 2) secondLine = secondLine[1]
+      var secondLineIsDivider = secondLine.indexOf('| ---') === 0
+      
+      var columnCount = tableColCount(node);
+      var emptyHeader = ''
+      if (columnCount && !secondLineIsDivider) {
+        emptyHeader = '|' + '     |'.repeat(columnCount) + '\n' + '|' + ' --- |'.repeat(columnCount)
+      }
+  
+      return '\n\n' + emptyHeader + content + '\n\n'
     }
   };
 
@@ -128,6 +140,16 @@ export var TurndownPluginGfmService = (function (exports) {
     return (' ' + spannedCellContent + ' |').repeat(colspan - 1)
   }
 
+  function tableColCount(node) {
+    let maxColCount = 0;
+    for (let i = 0; i < node.rows.length; i++) {
+      const row = node.rows[i]
+      const colCount = row.childNodes.length
+      if (colCount > maxColCount) maxColCount = colCount
+    }
+    return maxColCount
+  }
+  
   function isNestedTable (tableNode) {
     var currentNode = tableNode.parentNode;
     while (currentNode) {
