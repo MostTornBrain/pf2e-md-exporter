@@ -637,7 +637,7 @@ function convertPF2ETags(doc, html) {
     // Convert Foundry roll commands to plain text
     // Format is [[/r (dice formula) description[sometext]]]{plain text}. 
     //     We just want to grab the {plain text}
-    const roll2Pattern = /\[\[\/(?:[br]+)\s+(?:.*?)\]\]{(.*?)}/g;
+    const roll2Pattern = /\[\[\/(?:[brgm]+)\s+(?:.*?)\]\]{(.*?)}/g;
     markdown = markdown.replace(roll2Pattern, function(match, p1) {
                                                 return `${p1}`;
                                             });
@@ -646,7 +646,7 @@ function convertPF2ETags(doc, html) {
     // Format is [[/r (dice formula) description[sometext]]], 
     //     where the "description" and [sometext] is optional
     // The dice formula can contain a level reference as "@item.level".
-    const rollPattern = /\[\[\/(?:[br]+)\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
+    const rollPattern = /\[\[\/(?:[brgm]+)\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
     markdown = markdown.replace(rollPattern, function(match, p1, p2) {
                                             let result = doMath(doc, p1);
                                             if (p2 && p2 != 'healing' && !p2.includes('#')){
@@ -664,6 +664,15 @@ function convertPF2ETags(doc, html) {
                                                 }
                                             }
                                             });
+
+    // Convert Foundry act commands to plain text
+    // Format is [[/act description]]. 
+    //     We want to grab the description and make it a link
+    const actPattern = /\[\[\/act\s+(.*?)\]\]/g;
+    markdown = markdown.replace(actPattern, function(match, p1) {
+                                                return `[[Actions/${p1}|${p1}]]`;
+                                            });
+
 
     // Match things like: @Check[type:thievery|dc:20]{Thievery Skill Check}
     // and turn it into: Dc 20 Thievery Skill Check
