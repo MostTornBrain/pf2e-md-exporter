@@ -94,9 +94,11 @@ export var TurndownService = (function () {
         callout_type = "cite";
       } else if (pclass.includes('encounter')) {
         callout_type = "danger";
+      } else if (pclass.includes('investigation')) {
+        callout_type = "question";
       } else if (pclass.includes('treasure')) {
         callout_type = "example";
-      }  else if (pclass.includes('creation') || pclass.includes('fvtt')) {
+      }  else if (pclass.includes('creation') || pclass.includes('fvtt') || pclass.includes('compartment')) {
         callout_type = "tip";
       } else if (!pclass.includes('info')) {
         console.log("Unknown box text: ", pclass);
