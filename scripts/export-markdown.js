@@ -864,6 +864,14 @@ function setupTurndown() {
           }
         });
 
+        // Definition lists are just simple text otherwise
+        turndownService.addRule('replaceDts', {
+            filter: ['dt'],
+            replacement: function (content) {
+                return '##### ' + content;
+            }
+        });
+
     }
 }
 
