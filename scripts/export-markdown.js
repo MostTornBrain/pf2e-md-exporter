@@ -678,7 +678,7 @@ function convertPF2ETags(doc, html) {
     // and turn it into: Dc 20 Thievery Skill Check
     const checkPatternWithDesc = /@Check\[(?:[^\]]*?\|)?type:([^\|\]]+)\|(?:[^\]]*?)dc:(\d+)(?:\|[^\]]*?)?\]\{([^}]*)\}/g;
     markdown = markdown.replace(checkPatternWithDesc, function(match, p1, p2, p3) {
-        return `DC ${p2} ${p3}`;
+        return `\`DC ${p2} ${p3}\``;
     });
 
 
@@ -790,7 +790,7 @@ function convertPF2ETags(doc, html) {
     markdown = markdown.replace(checkPattern, function(match, p1, p2) {
                                                     // Convert sluggified p1 to more friendly label
                                                     p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
-                                                    return `DC ${p2} ${p1} check`;
+                                                    return `\`DC ${p2} ${p1} check\``;
                                                 });
 
     // Convert @Check for "basic save" to plain text
@@ -804,10 +804,10 @@ function convertPF2ETags(doc, html) {
                                                     p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
 
                                                     if (basic) {
-                                                        return `basic ${p1} check`;
+                                                        return `\`basic ${p1} check\``;
                                                     } else {
-                                                        return `${p1} check`;
-                                                    }   
+                                                        return `\`${p1} check\``;
+                                                    }
                                                 });
 
     return markdown;
@@ -864,6 +864,14 @@ function setupTurndown() {
           }
         });
 
+        // Definition lists are just simple text otherwise
+        turndownService.addRule('replaceDts', {
+            filter: ['dt'],
+            replacement: function (content) {
+                return '##### ' + content;
+            }
+        });
+
     }
 }
 
@@ -886,10 +894,11 @@ async function convertHtmlAsync(doc, html) {
 
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
         markdown = turndownService.turndown(markdown).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
-        
-        // Correct any escaped underscores that resulted from the turndown service
+
+        // Correct any escaped underscores and backticks that resulted from the turndown service
         markdown = markdown.replaceAll("\\_", "_");
-        
+        markdown = markdown.replaceAll("\\`", "`");
+
         // Now convert file references
         const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
         markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
@@ -949,10 +958,11 @@ export function convertHtml(doc, html) {
 
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
         markdown = turndownService.turndown(markdown).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
-        
-        // Correct any escaped underscores that resulted from the turndown service
+
+        // Correct any escaped underscores and backticks that resulted from the turndown service
         markdown = markdown.replaceAll("\\_", "_");
-        
+        markdown = markdown.replaceAll("\\`", "`");
+
         // Now convert file references
         const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
         markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
