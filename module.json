@@ -5,9 +5,9 @@
   "version": "#{VERSION}#",
   "library": "false",
   "compatibility": {
-    "minimum": 10,
-    "maximum": 12,
-    "verified": 12
+    "minimum": "13.336",
+    "maximum": "13.999",
+    "verified": "13.344"
   },
   "authors": [
 		{
@@ -17,10 +17,6 @@
   ],
   "relationships": {
     "requires": [
-			{
-				"id": "lib-wrapper",
-				"manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json"
-			},
       {
 				"id": "more-handlebars-helpers",
 				"manifest": "https://github.com/kgar/foundry-vtt-more-handlebars-helpers/releases/latest/download/module.json"

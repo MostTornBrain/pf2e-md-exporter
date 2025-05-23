@@ -1329,8 +1329,6 @@ async function onePackFolder(path, folder) {
     }
 }
 
-let is_v10=false
-
 export async function exportMarkdown(from, zipname) {
 
     clearTemplateCache();
@@ -1378,11 +1376,11 @@ export async function exportMarkdown(from, zipname) {
         else
             await oneFolder(TOP_PATH, from);
     }
-    else if (is_v10 ? from instanceof SidebarDirectory : from instanceof DocumentDirectory) {
-        for (const doc of from.documents) {
+    else if (from instanceof foundry.applications.sidebar.DocumentDirectory) {
+        for (const doc of from.collection) {
             await oneDocument(folderpath(doc), doc);
         }
-    } else if (from instanceof CompendiumDirectory) {
+    } else if (from instanceof foundry.applications.sidebar.tabs.CompendiumDirectory) {
         // from.collection does not exist in V10
         for (const doc of game.packs) {
             await onePack(folderpath(doc), doc);
@@ -1394,7 +1392,7 @@ export async function exportMarkdown(from, zipname) {
             await oneDocument(TOP_PATH, combat);
         }
     }
-    else if (from instanceof ChatLog) {
+    else if (from instanceof foundry.applications.sidebar.tabs.ChatLog) {
         await oneChatLog(from.title, from);
     } else
         await oneDocument(TOP_PATH, from);
@@ -1410,76 +1408,58 @@ function ziprawfilename(name, type) {
     return `${type}-${name}`;
 }
 
-Hooks.once('init', async () => {
-    // Foundry V10 doesn't use DocumentDirectory
-    is_v10 = (typeof DocumentDirectory === "undefined");
-
-    // If not done during "init" hook, then the journal entry context menu doesn't work
-
-    const baseClass = is_v10 ? "SidebarDirectory" : "DocumentDirectory";
-
-    // JOURNAL ENTRY context menu
-    function addEntryMenu(wrapped, ...args) {
-        return wrapped(...args).concat({
-            name: `${MODULE_NAME}.exportToMarkdown`,
-            icon: '<i class="fas fa-file-zip"></i>',
-            condition: () => game.user.isGM,
-            callback: async header => {
-                const li = header.closest(".directory-item");
-                const id = li.data(is_v10 ? "documentId" : "entryId");
-                const entry = this.documents.find(d => d.id === id);
-                //const entry = this.collection.get(li.data("entryId")); // works only on V11+
-                if (entry) exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
-            },
-        });
-    }
-    libWrapper.register(MODULE_NAME, `${baseClass}.prototype._getEntryContextOptions`, addEntryMenu, libWrapper.WRAPPER);
-
-    function addCompendiumEntryMenu(wrapped, ...args) {
-        return wrapped(...args).concat({
-            name: `${MODULE_NAME}.exportToMarkdown`,
-            icon: '<i class="fas fa-file-zip"></i>',
-            condition: li => game.user.isGM,
-            callback: async li => {
-                const pack = game.packs.get(li.data("pack"));
-                if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
-            },
-        });
-    }
-    libWrapper.register(MODULE_NAME, "CompendiumDirectory.prototype._getEntryContextOptions", addCompendiumEntryMenu, libWrapper.WRAPPER);
-
-    // FOLDER context menu: needs 
-    function addFolderMenu(wrapped, ...args) {
-        return wrapped(...args).concat({
-            name: `${MODULE_NAME}.exportToMarkdown`,
-            icon: '<i class="fas fa-file-zip"></i>',
-            condition: () => game.user.isGM,
-            callback: async header => {
-                const li = header.closest(".directory-item")[0];
-                // li.dataset.uuid does not exist in Foundry V10
-                const folder = fromUuidSync(`Folder.${li.dataset.folderId}`);
-                if (folder) exportMarkdown(folder, ziprawfilename(folder.name, folder.type));
-            },
-        });
-    }
-    libWrapper.register(MODULE_NAME, `${baseClass}.prototype._getFolderContextOptions`, addFolderMenu, libWrapper.WRAPPER);
-    if (!is_v10) libWrapper.register(MODULE_NAME, "CompendiumDirectory.prototype._getFolderContextOptions", addFolderMenu, libWrapper.WRAPPER);
+Hooks.on('getEntryContextAbstractSidebarTab', (html, menuItems) => {
+    menuItems.push({
+        name: `${MODULE_NAME}.exportToMarkdown`,
+        icon: '<i class="fas fa-file-zip"></i>',
+        condition: () => game.user.isGM,
+        callback: async header => {
+            const li = header.closest(".directory-item");
+            const id = li.dataset.entryId;
+            const tabid = header.closest("section.directory").id;
+            if (tabid === "compendium") {
+              const pack = game.packs.get(li.dataset.pack);
+              if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
+            } else {
+              const collection = game.collections.find(collection => collection.apps.find(entry => entry.id === tabid));
+              if (!collection) return;
+              const entry = collection.get(li.dataset.entryId);
+              if (entry) exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
+            }
+        },
+    });
+})
+Hooks.on('getFolderContextAbstractSidebarTab', (html, menuItems) => {
+    menuItems.push({
+        name: `${MODULE_NAME}.exportToMarkdown`,
+        icon: '<i class="fas fa-file-zip"></i>',
+        condition: () => game.user.isGM,
+        callback: async header => {
+            const folder = await fromUuid(header.closest(".directory-item").dataset.uuid);
+            if (folder) exportMarkdown(folder, ziprawfilename(folder.name, folder.type));
+        },
+    });  
 })
 
-Hooks.on("renderSidebarTab", async (app, html) => {
+Hooks.on("renderAbstractSidebarTab", async (app, html) => {
     if (!game.user.isGM) return;
 
     if (!(app instanceof Settings)) {
-        const label = game.i18n.localize(`${MODULE_NAME}.exportToMarkdown`);
-        const help  = game.i18n.localize(`${MODULE_NAME}.exportToMarkdownTooltip`);
-        let button = $(`<button style="flex: 0" title="${help}"><i class='fas fa-file-zip'></i>${label}</button>`)
-        button.click((event) => {
-            event.preventDefault();
-            exportMarkdown(app, ziprawfilename(app.constructor.name));
-        });
+        if (html.querySelector(`button[id=${MODULE_NAME}]`)) return;
 
+        let button = document.createElement("button");
+        button.style = "flex: 0; height: 1.5em";
+        button.title = game.i18n.localize(`${MODULE_NAME}.exportToMarkdownTooltip`);
+        const label = game.i18n.localize(`${MODULE_NAME}.exportToMarkdown`);
+        button.innerHTML = `<i class='fas fa-file-zip'></i>${label}`;
+        button.id = MODULE_NAME;
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          exportMarkdown(app, ziprawfilename(app.constructor.name));
+        });
+  
         html.append(button);
     } else {
-        console.debug(`Export-Markdown | Not adding button to sidebar`, app)
+        console.debug(`Export-Markdown | Not adding button to Settings sidebar`, app)
     }
 })

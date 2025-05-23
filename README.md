@@ -16,7 +16,6 @@ This process requires you have a Foundry account with a World with the **Pathfin
 
 ## 1. Install the following required modules:
 * **PF2E Exporter** (This is what you are reading right now. Use manifest `https://github.com/MostTornBrain/pf2e-md-exporter/releases/latest/download/module.json`)
-* **libWrapper**
 * **More Handlebars Helpers**
 
 NOTE: You should be prompted to install the two extra required modules automatically when installing this module. 
@@ -25,7 +24,7 @@ NOTE: You should be prompted to install the two extra required modules automatic
 ## 2. Enable modules
 Launch your world in Foundry and log in as the Gamemaster account.   
 
-Choose `Manage Modules` in your logged into Foundry world.  Enable these three modules you installed in step 1. 
+Choose `Manage Modules` in your logged into Foundry world.  Enable these two modules you installed in step 1. 
 ![Required Modules](Screenshots/RequiredModules.png)
 
 ## 3. Configure PF2E Exporter
