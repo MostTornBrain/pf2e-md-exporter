@@ -1240,7 +1240,7 @@ async function maybeTemplate(path, doc) {
         }
     }
 
-    // Add extra property if initiative tracket option was selected
+    // Add extra property if initiative tracker option was selected
     if (include_initiative_tracker) {
         doc.include_initiative = true;
     }
@@ -1408,12 +1408,13 @@ function ziprawfilename(name, type) {
     return `${type}-${name}`;
 }
 
-Hooks.on('getEntryContextAbstractSidebarTab', (html, menuItems) => {
+function menuAppend(menuItems) {
     menuItems.push({
         name: `${MODULE_NAME}.exportToMarkdown`,
         icon: '<i class="fas fa-file-zip"></i>',
         condition: () => game.user.isGM,
         callback: async header => {
+            console.log("Exporting to Markdown: ", header);
             const li = header.closest(".directory-item");
             const id = li.dataset.entryId;
             const tabid = header.closest("section.directory").id;
@@ -1428,8 +1429,59 @@ Hooks.on('getEntryContextAbstractSidebarTab', (html, menuItems) => {
             }
         },
     });
+}
+
+/* Hooks for adding the "Export to Markdown" option to the context menu for each item within a tab, for right-clicking.
+   Each type of item had to be hooked separately.  There was no generic hook I could find for all ContextMenus. */
+
+Hooks.on("getRollTableContextOptions", (html, menuItems) => {
+    console.log(`PF2E-MD-EXPORTER | getRollTableContextOptions`);
+
+    menuAppend(menuItems);
 })
-Hooks.on('getFolderContextAbstractSidebarTab', (html, menuItems) => {
+
+Hooks.on("getCardsContextOptions", (html, menuItems) => {
+    console.log(`PF2E-MD-EXPORTER | getCardsTableContextOptions`);
+
+    menuAppend(menuItems);
+})
+
+/* Export of Chat messages not implemented */
+/*
+Hooks.on("getChatMessageContextOptions", (html, menuItems) => {
+    console.log(`PF2E-MD-EXPORTER | getChatMessageContextOptions`);
+
+    menuAppend(menuItems);
+})
+*/
+
+Hooks.on("getJournalEntryContextOptions", (html, menuItems) => {
+    menuAppend(menuItems);
+})
+
+Hooks.on("getSceneContextOptions", (html, menuItems) => {
+    menuAppend(menuItems);
+})
+
+Hooks.on("getItemContextOptions", (html, menuItems) => {
+    menuAppend(menuItems);
+})
+
+Hooks.on("getActorContextOptions", (html, menuItems) => {
+    menuAppend(menuItems);
+})
+
+Hooks.on("getCompendiumContextOptions", (html, menuItems) => {
+    menuAppend(menuItems);
+})
+
+/* 
+Hooks.on("getContextMenuEntryContext", (html, menuItems) => {
+    console.log(`PF2E-MD-EXPORTER | getContextMenuEntryContext`);
+})
+*/
+
+Hooks.on("getFolderContextOptions", (html, menuItems) => {
     menuItems.push({
         name: `${MODULE_NAME}.exportToMarkdown`,
         icon: '<i class="fas fa-file-zip"></i>',
@@ -1441,6 +1493,7 @@ Hooks.on('getFolderContextAbstractSidebarTab', (html, menuItems) => {
     });  
 })
 
+/* Hook for adding the "Export to Markdown" button to the bottom of the sidebar for each tab */
 Hooks.on("renderAbstractSidebarTab", async (app, html) => {
     if (!game.user.isGM) return;
 
@@ -1459,7 +1512,5 @@ Hooks.on("renderAbstractSidebarTab", async (app, html) => {
         });
   
         html.append(button);
-    } else {
-        console.debug(`Export-Markdown | Not adding button to Settings sidebar`, app)
     }
 })
