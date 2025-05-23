@@ -229,6 +229,10 @@ Hooks.once('ready', () => {
         if (quantity > 1) {
           linkName = `${quantity}x ${linkName}`;
         }        
+        // If the item has double-quotes in the name, escape them.
+        if (linkName.includes('"')) {
+          linkName = linkName.replaceAll('"', '\\"');
+        }
         equipmentList.push(linkName);
       }
     }
