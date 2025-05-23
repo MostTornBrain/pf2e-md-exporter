@@ -85,7 +85,7 @@ Hooks.once('ready', () => {
         filePicker: "text"
     })
 
-    for (const type of game.template.Actor.types) {
+    for (const type of Object.keys(CONFIG.Actor.typeLabels)) {
         const label = CONFIG.Actor.typeLabels[type];
         const actorname = game.i18n.has(label) ? game.i18n.localize(label) : type;
         let handlebarDefault = "";
@@ -120,7 +120,7 @@ Hooks.once('ready', () => {
         filePicker: "text"
     })
 
-    for (const type of game.template.Item.types) {
+    for (const type of Object.keys(CONFIG.Item.typeLabels)) {
         const label = CONFIG.Item.typeLabels[type];
         const itemname = game.i18n.has(label) ? game.i18n.localize(label) : type;
         let handlebarDefault = "";

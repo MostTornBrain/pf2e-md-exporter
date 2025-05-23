@@ -1385,9 +1385,9 @@ export async function exportMarkdown(from, zipname) {
         for (const doc of game.packs) {
             await onePack(folderpath(doc), doc);
         }
-    } else if (from instanceof CompendiumCollection) {
+    } else if (from instanceof foundry.documents.collections.CompendiumCollection) {
         await onePack(TOP_PATH, from);
-    } else if (from instanceof CombatTracker) {
+    } else if (from instanceof foundry.applications.sidebar.tabs.CombatTracker) {
         for (const combat of from.combats) {
             await oneDocument(TOP_PATH, combat);
         }
@@ -1435,14 +1435,10 @@ function menuAppend(menuItems) {
    Each type of item had to be hooked separately.  There was no generic hook I could find for all ContextMenus. */
 
 Hooks.on("getRollTableContextOptions", (html, menuItems) => {
-    console.log(`PF2E-MD-EXPORTER | getRollTableContextOptions`);
-
     menuAppend(menuItems);
 })
 
 Hooks.on("getCardsContextOptions", (html, menuItems) => {
-    console.log(`PF2E-MD-EXPORTER | getCardsTableContextOptions`);
-
     menuAppend(menuItems);
 })
 
@@ -1497,7 +1493,7 @@ Hooks.on("getFolderContextOptions", (html, menuItems) => {
 Hooks.on("renderAbstractSidebarTab", async (app, html) => {
     if (!game.user.isGM) return;
 
-    if (!(app instanceof Settings)) {
+    if (!(app instanceof foundry.applications.sidebar.tabs.Settings)) {
         if (html.querySelector(`button[id=${MODULE_NAME}]`)) return;
 
         let button = document.createElement("button");
