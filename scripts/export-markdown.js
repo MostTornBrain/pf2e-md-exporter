@@ -689,6 +689,21 @@ function convertPF2ETags(doc, html) {
                                                     return match;
                                                 });
 
+    // Display console warning about unbalanced left brackets for any @ tags,
+    // such as @damage[(2d6+4)[cold],[1d4[cold]]{plain text},
+    // but don't change the markdown.
+    const unbalancedPattern = /@(?:\w+)\[([^\[\]]+)\[(.*?)\](?:\|.*?)*\]/g;
+    markdown = markdown.replace(unbalancedPattern, function(match, p1, p2) {
+                                                    // Check for unbalanced left brackets
+                                                    const leftBracketCount = p2.split('[').length - 1;
+                                                    const rightBracketCount = p2.split(']').length - 1;
+                                                    if (leftBracketCount > rightBracketCount) {
+                                                        console.warn(`${doc.name} : Unbalanced left bracket in @ tag: ${match}`);
+                                                    }
+                                                    return match; // Return the original match unchanged
+                                                });
+
+
     // Convert @"Something" tags to plain text
     // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
     // Could be @Damage, @Template, @Check...
@@ -701,6 +716,20 @@ function convertPF2ETags(doc, html) {
                                                         return match;
                                                     } else {
                                                         return `${p2}`;
+                                                    }
+                                                });
+
+    // Convert something like @Damage[(2d6+5)[cold],[1d4[cold]]{2d6+5 cold damage plus 1d4 cold damage}
+    // NOTE: the above pattern is actually a typo since there is an unbalanced left bracket in the second part, but this currently 
+    //       exists in the Foundry data, so we need to handle it.
+    const genericPattern2 = /@(?:\w+)\[([^\[\]]+)\[(.*?)\](?:\|.*?)*\]\{([^}]*)\}/g
+    markdown = markdown.replace(genericPattern2, function(match, p1, p2, p3) {
+                                                    if (match.includes('@UUID') || match.includes('@Actor') || match.includes('@Compendium')
+                                                        || match.includes('@Item') || match.includes('@Macro')) {
+                                                        // Let these drop through so they get processed as links later
+                                                        return match;
+                                                    } else {
+                                                        return `${p3}`;
                                                     }
                                                 });
 
@@ -995,7 +1024,7 @@ export function convertHtml(doc, html) {
 
     } catch (error) {
         console.warn(error);
-        console.warn(`Error: failed to decode html:`, html)
+        console.warn(`Error: failed to decode html for "`, doc.name, `" :`, html)
     }
 
     return markdown;
