@@ -150,6 +150,16 @@ Hooks.once('ready', () => {
     }
   });
 
+  Handlebars.registerHelper('me-attack-effect', function (value) {
+    // Convert a sluggified attack effect into its localized human-readable text
+    let lookUpText = CONFIG.PF2E.attackEffects[value];
+    if (lookUpText) {
+      return game.i18n.localize(lookUpText)
+    } else {
+      return value;
+    }
+  });
+
   Handlebars.registerHelper('me-spellLevels', function (items, id, spellType) {
     // Return the high-to-low sorted list of spell levels for the given spellCastingAbility ID.
     // If cantrips = true, return the list of cantrip levels, otherwise return the list
