@@ -1096,7 +1096,7 @@ async function oneRollTable(path, table) {
     for (const tableresult of table.results) {
         const range  = (tableresult.range[0] == tableresult.range[1]) ? tableresult.range[0] : `${tableresult.range[0]}-${tableresult.range[1]}`;
         // Escape the "|" in any links
-        markdown += `| ${range} | ${(await convertHtmlAsync(table, tableresult.getChatText())).replaceAll("|","\\|")} |\n`;
+        markdown += `| ${range} | ${(await convertHtmlAsync(table, (await tableresult.getHTML()))).replaceAll("|","\\|")} |\n`;
     }
 
     // No path for tables
