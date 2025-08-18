@@ -4,8 +4,10 @@
 title: "{{{name}}}"
 obsidianUIMode: preview
 noteType: pf2eLoot
-cssClasses: pf2e
-aliases: "{{{uuid}}}" 
+cssClasses:
+  - pf2e
+aliases:
+  - "{{{uuid}}}" 
 tags:
 {{#each system.traits.value}}  - pf2e/loot/type/{{this}}
   {{/each}}

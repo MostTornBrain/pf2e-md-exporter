@@ -2,7 +2,9 @@
 ---
 obsidianUIMode: preview
 title: "{{{name}}}"
-cssclasses: pf2e,pf2e-spell
+cssclasses:
+  - pf2e
+  - pf2e-spell
 tags:
   - pf2e/weapon
   {{#each system.traits.value}}
@@ -15,7 +17,8 @@ tags:
 {{#if system.publication.remaster}}
   - remaster
 {{/if~}}
-aliases: "{{uuid}}"
+aliases:
+  - "{{uuid}}"
 license: {{system.publication.license}}
 ---
 # {{{name}}}{{#if (and system.actionType.value (and (ne system.actionType.value "action") (ne system.actionType.value "passive")))}} {{{more-handlebars-helpers-table system.actionType.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}

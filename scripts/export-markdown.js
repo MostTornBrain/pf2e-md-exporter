@@ -1036,7 +1036,7 @@ function frontmatter(doc, showheader=true) {
     return FRONTMATTER + 
         `title: "${doc.name}"\n` + 
         `icon: "${DOCUMENT_ICON.lookup(doc)}"\n` +
-        `aliases: "${doc.name}"\n` + 
+        `aliases:\n  - "${doc.name}"\n` + 
         `foundryId: ${doc.uuid}\n` + 
         `tags:\n  - ${doc.documentName}\n` +
         FRONTMATTER +

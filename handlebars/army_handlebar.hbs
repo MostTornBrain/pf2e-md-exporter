@@ -4,7 +4,8 @@
 title: {{{name}}}
 obsidianUIMode: preview
 noteType: pf2eArmy
-cssClasses: pf2e
+cssClasses:
+  - pf2e
 tags:
 {{#each system.traits.value as |trait|}}
   - {{trait}}
@@ -15,7 +16,8 @@ tags:
   - remaster
 {{/if~}}
 source: {{system.details.publication.title}}
-aliases: "{{{uuid}}}" 
+aliases:
+  - "{{{uuid}}}" 
 level: {{system.details.level.value}}
 license: {{system.details.publication.license}}
 statblock: inline

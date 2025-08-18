@@ -3,7 +3,9 @@
 obsidianUIMode: preview
 title: "{{{name}}}"
 noteType: pf2eSpell
-cssclasses: pf2e,pf2e-spell
+cssclasses:
+  - pf2e
+  - pf2e-spell
 tags:
   - pf2eSpell
   - spell/level/{{system.level.value}}
@@ -23,7 +25,8 @@ tags:
 {{#if system.publication.remaster}}
   - remaster
 {{/if~}}
-aliases: "{{{uuid}}}" 
+aliases:
+  - "{{{uuid}}}" 
 license: {{system.publication.license}}
 ---
 ```statblock
