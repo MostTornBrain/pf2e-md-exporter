@@ -10,18 +10,25 @@
     "verified": "13.344"
   },
   "authors": [
-		{
-			"name": "MostTornBrain",
-			"url": "https://github.com/MostTornBrain"
-		}
+    {
+      "name": "MostTornBrain",
+      "url": "https://github.com/MostTornBrain"
+    }
   ],
   "relationships": {
+    "systems": [
+      "id": "pf2e",
+      "type": "system",
+      "compatibility": {
+        "verified": "7.8.0",
+        "maximum": "8.0.0"
+      }
+    ],
     "requires": [
       {
-				"id": "more-handlebars-helpers",
-				"manifest": "https://github.com/kgar/foundry-vtt-more-handlebars-helpers/releases/latest/download/module.json"
-			}
-
+        "id": "more-handlebars-helpers",
+        "manifest": "https://github.com/kgar/foundry-vtt-more-handlebars-helpers/releases/latest/download/module.json"
+      }
     ]
   },
   "esmodules": [
