@@ -1448,13 +1448,13 @@ function menuAppend(menuItems) {
             const id = li.dataset.entryId;
             const tabid = header.closest("section.directory").id;
             if (tabid === "compendium") {
-              const pack = game.packs.get(li.dataset.pack);
-              if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
+                const pack = game.packs.get(li.dataset.pack);
+                if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
             } else {
-              const collection = game.collections.find(collection => collection.apps.find(entry => entry.id === tabid));
-              if (!collection) return;
-              const entry = collection.get(li.dataset.entryId);
-              if (entry) exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
+                const uuid = tabid.replace("_", ".").replace("compendium-", "Compendium.") + "." + id;
+                const entry = await fromUuid(uuid);
+                console.log(`Unable to find entry for UUID {uuid}`);
+                if (entry) exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
             }
         },
     });
