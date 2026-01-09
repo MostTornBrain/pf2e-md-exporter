@@ -16,14 +16,14 @@
     }
   ],
   "relationships": {
-    "systems": [
+    "systems": [{
       "id": "pf2e",
       "type": "system",
       "compatibility": {
         "verified": "7.8.0",
         "minimum": "7.5.0"
       }
-    ],
+    }],
     "requires": [
       {
         "id": "more-handlebars-helpers",
