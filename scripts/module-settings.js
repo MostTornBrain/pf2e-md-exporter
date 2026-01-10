@@ -280,6 +280,13 @@ Hooks.once('ready', () => {
     return lootList;
   });
 
+  Handlebars.registerHelper('me-getSpeeds', function(speeds) {
+    if (!speeds) return "";
+    return Object.values(speeds)
+      .filter(i => i != null && i.type != "travel")
+      .map(i => `${i.type} ${i.value} ft`.replace("land ", ""));
+  })
+
   Handlebars.registerHelper('me-getRituals', function (items, ) {
     // Return the list of ritual spells.
     let item;

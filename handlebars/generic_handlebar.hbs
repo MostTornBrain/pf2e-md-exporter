@@ -39,7 +39,7 @@ license: {{system.publication.license}}
 [[{{this}}]]{{/each}}
 
 {{#if system.category}}**Category** {{{system.category}}}; {{/if}}{{#if system.group}}**Group** {{system.group}}{{/if}}
-{{#if system.price.value}}**Price** {{coinLabel price.value}}; {{/if}}{{#if (gt system.quantity 1)}}**Quantity** {{system.quantity}}{{/if}}
+{{#if system.price.value}}**Price** {{price.value}}; {{/if}}{{#if (gt system.quantity 1)}}**Quantity** {{system.quantity}}{{/if}}
 {{#if system.bulk}}**Bulk** {{#if (eq system.bulk.value 0.1)}}L{{else}}{{system.bulk.value}}{{/if}}; {{/if}}{{#if system.size}}**Size** {{system.size}}{{/if}}
 {{#if system.usage}}**Usage** {{system.usage.value}}{{/if}}
 {{#if system.prerequisites.value}}**Prerequisites** {{#each system.prerequisites.value}}{{{this.value}}}{{ifThen @last "" "; "}}{{/each}}

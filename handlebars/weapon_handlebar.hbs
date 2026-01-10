@@ -31,7 +31,7 @@ license: {{system.publication.license}}
 |  |  |
 | -- | -- |
 | {{#if system.category}}**Category** {{{system.category}}} {{#if system.range}}ranged{{else}}melee{{/if}} weapon{{/if}} | {{#if system.group}}**Group** {{system.group}}{{/if}} |
-| {{#if system.price.value}}**Price** {{coinLabel price.value}}{{/if}} | {{#if (gt system.quantity 1)}}**Quantity** {{system.quantity}}{{/if}} |
+| {{#if system.price.value}}**Price** {{price.value}}{{/if}} | {{#if (gt system.quantity 1)}}**Quantity** {{system.quantity}}{{/if}} |
 | {{#if system.bulk}}**Bulk** {{#if (eq system.bulk.value 0.1)}}L{{else}}{{system.bulk.value}}{{/if}} {{/if}}| **Size** {{system.size}} |
 {{#if system.range}}|**Range** {{system.range}} ft.| **Reload** {{system.reload.value}}|
 {{/if}}| {{#if system.damage}}**Damage** {{system.damage.dice}}{{system.damage.die}} {{system.damage.damageType}} {{#if system.damage.persistent}}({{system.damage.persistent.number}} persistent {{system.damage.persistent.type}}){{/if}}{{/if}} | {{#if system.usage}}**Usage** {{system.usage.value}}{{/if}} |
