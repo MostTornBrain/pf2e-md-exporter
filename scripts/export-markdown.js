@@ -1453,8 +1453,11 @@ function menuAppend(menuItems) {
             } else {
                 const uuid = tabid.replace("_", ".").replace("compendium-", "Compendium.") + "." + id;
                 const entry = await fromUuid(uuid);
-                console.log(`Unable to find entry for UUID {uuid}`);
-                if (entry) exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
+                if (entry) {
+                    exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
+                } else {
+                    console.log(`Unable to find entry for UUID ${uuid}`);
+                }
             }
         },
     });
