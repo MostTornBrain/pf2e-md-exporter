@@ -30,7 +30,7 @@ aliases:
 license: {{system.publication.license}}
 ---
 ```statblock
-name: "{{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}"
+name: "{{{name}}} {{#if actionGlyph}} {{{me-actionIcon system.time.value}}}{{/if}}"
 level: "{{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}"
 {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "rare_03: [[Uncommon]]" "rare" "rare_03: [[Rare]]" "unique" "rare_03: [[Unique]]"}}}
 {{#each system.traits.value as |trait index|}}trait_0{{add index 1}}: [[{{trait}}]]
@@ -46,7 +46,7 @@ abilities_top:
 {{/if}}
 {{#if (or (not actionGlyph) (or system.cost.value system.ritual.secondary.casters))}}
   - name: "Cast"
-    desc: "{{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}
+    desc: "{{{me-actionIcon system.time.value}}}
 {{~#if system.cost.value~}}
 ; **Cost** {{{system.cost.value}}}
 {{~/if~}}
