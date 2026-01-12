@@ -1356,6 +1356,9 @@ async function onePackFolder(path, folder) {
     for (const pack of game.packs.filter(pack => pack.folder === folder)) {
         await onePack(subpath, pack);
     }
+    for (const childfolder of folder.getSubfolders(/*recursive*/false)) {
+        await onePackFolder(subpath, childfolder);
+    }
 }
 
 export async function exportMarkdown(from, zipname) {
