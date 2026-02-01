@@ -29,65 +29,44 @@ aliases:
   - "{{{uuid}}}" 
 license: {{system.publication.license}}
 ---
-```statblock
-name: "{{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}"
-level: "{{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}"
-{{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "rare_03: [[Uncommon]]" "rare" "rare_03: [[Rare]]" "unique" "rare_03: [[Unique]]"}}}
-{{#each system.traits.value as |trait index|}}trait_0{{add index 1}}: [[{{trait}}]]
-{{/each~}}
-layout: Basic Pathfinder 2e Layout
-columns: 1
-columnWidth: x
-abilities_top:
-  - name: ""
+# {{{name}}} {{#if actionGlyph}} {{{me-actionIcon system.time.value}}}{{/if}} _{{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}_
+
+> [!pf2e-traits]
+> - {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[[Uncommon]]" "rare" "[[Rare]]" "unique" "[[Unique]]"}}}
+{{#each system.traits.value as |trait index|}}
+> - [[{{trait}}]]
+{{/each}}
+
 {{#if system.traits.traditions}}
-  - name: "Traditions"
-    desc: "{{#each system.traits.traditions}}{{this}}{{ifThen @last "" ", "}}{{/each}}"
+- Traditions :: {{#each system.traits.traditions}}{{this}}{{ifThen @last "" ", "}}{{/each}}
 {{/if}}
-{{#if (or (not actionGlyph) (or system.cost.value system.ritual.secondary.casters))}}
-  - name: "Cast"
-    desc: "{{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}
+{{~#if (or (not actionGlyph) (or system.cost.value system.ritual.secondary.casters))}}
+- Cast :: {{{me-actionIcon system.time.value}}}
 {{~#if system.cost.value~}}
-; **Cost** {{{system.cost.value}}}
+- Cost :: {{{system.cost.value}}}
 {{~/if~}}
 {{~#if system.ritual.secondary.casters~}}
-; **Secondary Casters** {{system.ritual.secondary.casters}}
+- Secondary Casters :: {{system.ritual.secondary.casters}}
 {{~/if~}}
-"
 {{/if}}
 {{#if system.ritual.primary.check}}
-  - name: "Primary Check"
-    desc: "{{system.ritual.primary.check}}
+- Primary Check :: {{system.ritual.primary.check}}
 {{~/if~}}
 {{#if system.ritual.secondary.checks~}}
-; **Secondary Checks** {{system.ritual.secondary.checks}}
-{{~/if~}}
-{{~#if system.ritual.primary.check}}"
-{{/if}}
-{{#if system.range.value}}
-  - name: "Range"{{else}}{{#if system.area.value}}
-  - name: "Area"{{else}}{{#if system.target.value}}
-  - name: "Targets"
-{{/if}}{{/if}}{{/if}}
-{{#if (or (or system.range.value system.area.value) system.target.value)}}
-    desc: "{{#if system.range.value}}{{system.range.value}}{{/if~}}
-{{#if system.area~}}
-{{#if system.range.value}}; **Area** {{/if}}{{system.area.value}}-foot {{system.area.type}}
-{{~/if~}}
-{{#if system.target.value~}}
-{{#if system.range.value}}; **Targets** {{/if}}{{system.target.value}}{{/if~}}"
+- Secondary Checks :: {{system.ritual.secondary.checks}}
+{{~/if~}}{{#if system.range.value}}
+- Range :: {{system.range.value}}
+{{/if}}{{#if system.area.value}}
+- Area :: {{system.area.value}}-foot {{system.area.type}}
+{{/if}}{{#if system.target.value}}
+- Targets :: {{system.target.value}}
+{{/if}}{{#if system.defense.save}}
+- Defense :: {{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}
 {{/if~}}
-{{#if system.defense.save}}
-  - name: "Defense"
-    desc: "{{#if system.defense.save.basic}}basic{{/if}} {{system.defense.save.statistic}}"
-{{/if~}}
-
 {{#if system.duration.value}}
-  - name: "Duration"
-    desc: "{{system.duration.value}}"
+- Duration :: {{system.duration.value}}
 {{/if}}
-abilities_mid:
-  - name: ""
-    desc: "{{{me-HTMLtoYAML system.description.value this}}}"
-sourcebook: "_{{{system.publication.title}}}_"
-```
+
+{{{me-HTMLtoMarkdown system.description.value this}}}
+
+Source :: {{{system.publication.title}}}

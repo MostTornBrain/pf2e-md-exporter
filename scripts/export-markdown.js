@@ -859,7 +859,6 @@ function setupTurndown() {
         turndownService.use(gfm);
         
         // Add a custom rule for handling action-glyph spans.
-        // Convert them to Obsidian PF2E Action Icons plugin format.
         turndownService.addRule('actionGlyph', {
           filter: function (node, options) {
             return (
@@ -868,28 +867,7 @@ function setupTurndown() {
             );
           },
           replacement: function (content, node, options) {
-            // Match the default format used by the PF2E Action Icons plugin
-            switch (content) {
-             // Free action
-             case 'F':
-             case 'f':
-                content = '0';
-                break;
-                
-             // Reaction
-             case 'R':
-             case 'r':
-                content = 'r';
-                break;
-                
-             // Action - some Foundry entries use 1 (such as most spells), others use 'a'
-             case 'a':
-             case 'A':
-                content = '1';
-                break;
-            }
-            
-            return '`pf2:' + content + '`';
+             return MOD_CONFIG.actionIcon(content, game.settings);
           }
         });
 
@@ -970,7 +948,6 @@ async function convertHtmlAsync(doc, html) {
 // Unfortunately, handlebars don't run asynchronously, so I need a redundant version
 // of the HTML conversion code that is synchronous, which won't handle pulling in the contents of @Embed tags.    
 export function convertHtml(doc, html) {
-
     // console.log("Converting synchronously: ", html);
 
     setupTurndown();
@@ -1356,9 +1333,13 @@ async function onePackFolder(path, folder) {
     for (const pack of game.packs.filter(pack => pack.folder === folder)) {
         await onePack(subpath, pack);
     }
+    for (const childfolder of folder.getSubfolders(/*recursive*/false)) {
+        await onePackFolder(subpath, childfolder);
+    }
 }
 
 export async function exportMarkdown(from, zipname) {
+    console.log(from);
 
     clearTemplateCache();
 
@@ -1448,13 +1429,16 @@ function menuAppend(menuItems) {
             const id = li.dataset.entryId;
             const tabid = header.closest("section.directory").id;
             if (tabid === "compendium") {
-              const pack = game.packs.get(li.dataset.pack);
-              if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
+                const pack = game.packs.get(li.dataset.pack);
+                if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
             } else {
-              const collection = game.collections.find(collection => collection.apps.find(entry => entry.id === tabid));
-              if (!collection) return;
-              const entry = collection.get(li.dataset.entryId);
-              if (entry) exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
+                const uuid = tabid.replace("_", ".").replace("compendium-", "Compendium.") + "." + id;
+                const entry = await fromUuid(uuid);
+                if (entry) {
+                    exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
+                } else {
+                    console.log(`Unable to find entry for UUID ${uuid}`);
+                }
             }
         },
     });

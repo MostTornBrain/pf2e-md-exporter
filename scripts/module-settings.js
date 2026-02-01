@@ -65,12 +65,21 @@ Hooks.once('ready', () => {
 		config: true,
 	});
 
-    game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_INCLUDE_INITIATIVE, {
+  game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_INCLUDE_INITIATIVE, {
 		name: "Include Initiative Tracker markdown",
 		hint: "When checked, any monsters being exported will include markdown to support the Obsidian Initiative Tracker plugin.",
 		scope: "world",
 		type:  Boolean,
 		default: false,
+		config: true,
+	});
+
+  game.settings.register(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_USE_PF2E_ACTION_ICONS_PLUGIN, {
+		name: "Format icons for Pathfinder 2e Action Icons Plugin",
+	      hint: "When checked, all action icons will be exported in the format used by the Obisidan Pathfinder 2e Action Icons plugin, e.g. `pf2:1`. Otherwise, they will be exported as Unicode characters.",
+		scope: "world",
+		type:  Boolean,
+		default: true,
 		config: true,
 	});
 
@@ -139,7 +148,13 @@ Hooks.once('ready', () => {
             filePicker: "text"
         })
     }
-    
+
+  Handlebars.registerHelper('me-actionIcon', function (value, options) {
+    // Convert an action descriptor (e.g. "1") into an action icon
+    const fallback = options.hash.fallback || "";
+    return MOD_CONFIG.actionIcon(value || fallback, game.settings);
+  })
+
   Handlebars.registerHelper('me-trait', function (value) {
     // Convert a sluggified trait into its localized human-readable text
     let lookUpText = CONFIG.PF2E.npcAttackTraits[value];
@@ -280,6 +295,20 @@ Hooks.once('ready', () => {
     return lootList;
   });
 
+  Handlebars.registerHelper('me-getItemsByType', function (items, type) {
+    return items.filter(i => i.type === type);
+  })
+
+  Handlebars.registerHelper('me-getAbilities', function(items, position, context) {
+    if (!items) return items;
+    switch (position) {
+      case "top": return items.filter(i => i.system.category === "interaction" && (htmlToYaml(i.system.description.value, context) || i.system.actions.value));
+      case "mid": return items.filter(i => i.system.category === "defensive" && (htmlToYaml(i.system.description.value, context) || (i.system.actions.value || (i.system.actionType.value && i.system.actionType.value !== "passive"))));
+      case "bot": return items.filter(i => i.system.category === "offensive" && (htmlToYaml(i.system.description.value, context) || i.system.actions.value));
+    }
+    return items;
+  })
+
   Handlebars.registerHelper('me-getSpeeds', function(speeds) {
     if (!speeds) return "";
     return Object.values(speeds)
@@ -376,7 +405,7 @@ Hooks.once('ready', () => {
     return spell_names;
   });
 
-  Handlebars.registerHelper('me-HTMLtoYAML', function (text, context, options) {
+  const htmlToYaml = (text, context, options) => {
     if (text) {
 
       // First, check if this item is a reference to another entry. 
@@ -397,14 +426,15 @@ Hooks.once('ready', () => {
         .replaceAll('\\.', '.')        // Replace escaped period with normal period.
         .replaceAll('"', '\\"')        // Escape all double quotes.
         .replace(/^\w+$/g, '')         // If we end up with only whitespace, return ''
-        .replaceAll('\\[reaction\\]', '`pf2:r`')
-        .replaceAll('\\[three-actions\\]', '`pf2:3`')
+        .replaceAll('\\[reaction\\]', MOD_CONFIG.actionIcon("reaction", game.settings))
+        .replaceAll('\\[three-actions\\]', MOD_CONFIG.actionIcon("3", game.settings))
         .replaceAll('\\[', '[')        // Replace escaped brackets with normal brackets.
         .replaceAll('\\]', ']')
         .replaceAll('\\n\\n* * *\\n\\n', '\\n* * *\\n');
     }
     return text;
-  });
+  };
+  Handlebars.registerHelper('me-HTMLtoYAML', htmlToYaml);
 
   Handlebars.registerHelper('me-HTMLtoMarkdown', function (text, context) {
      if (text) {

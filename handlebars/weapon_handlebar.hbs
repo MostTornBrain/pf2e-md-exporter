@@ -21,8 +21,7 @@ aliases:
   - "{{uuid}}"
 license: {{system.publication.license}}
 ---
-# {{{name}}}{{#if (and system.actionType.value (and (ne system.actionType.value "action") (ne system.actionType.value "passive")))}} {{{more-handlebars-helpers-table system.actionType.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
-{{~#if (eq system.actionType.value "action")}} {{{more-handlebars-helpers-table system.actions.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}{{/if}}
+# {{{name}}}{{{me-actionIcon system.actions.value fallback=system.actionType.value}}}
 ## Item {{system.level.value}}
 ### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
 {{~#each system.traits.value}}
