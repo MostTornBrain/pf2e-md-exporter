@@ -842,6 +842,27 @@ function convertPF2ETags(doc, html) {
     return markdown;
 }
 
+function decodeHtmlEntities(text) {
+    if (!text) return text;
+
+    const decoder = document.createElement("textarea");
+    const entityPattern = /&(#x[0-9a-fA-F]+|#\d+|[0-9a-zA-Z]+);/g;
+
+    let result = text;
+    const MAX_PASSES = 5;
+    for (let i = 0; i < MAX_PASSES; i++) {
+        const decoded = result.replaceAll(entityPattern, (match) => {
+            decoder.innerHTML = match;
+            return decoder.value;
+        });
+
+        if (decoded === result) break;
+        result = decoded;
+    }
+
+    return result;
+}
+
 function setupTurndown() {
 
     // Foundry uses "showdown" rather than "turndown":
@@ -927,6 +948,7 @@ async function convertHtmlAsync(doc, html) {
         // Correct any escaped underscores and backticks that resulted from the turndown service
         markdown = markdown.replaceAll("\\_", "_");
         markdown = markdown.replaceAll("\\`", "`");
+        markdown = decodeHtmlEntities(markdown);
 
         // Now convert file references
         const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
@@ -991,6 +1013,7 @@ export function convertHtml(doc, html) {
         // Correct any escaped underscores and backticks that resulted from the turndown service
         markdown = markdown.replaceAll("\\_", "_");
         markdown = markdown.replaceAll("\\`", "`");
+        markdown = decodeHtmlEntities(markdown);
 
         // Now convert file references
         const filepattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
@@ -1068,7 +1091,7 @@ async function oneJournal(path, journal) {
                         markdown = await convertHtmlAsync(page, page.text.content);
                         break;
                     case 2: // MARKDOWN
-                        markdown = page.text.markdown;
+                        markdown = decodeHtmlEntities(page.text.markdown);
                         break;
                 }
                 break;
@@ -1078,6 +1101,7 @@ async function oneJournal(path, journal) {
                 break;
         }
         if (markdown) {
+            markdown = decodeHtmlEntities(markdown);
             markdown = frontmatter(page, page.title.show) + markdown;
             zip.folder(subpath).file(`${notefilename(page)}.md`, markdown, { binary: false });
         }
@@ -1286,6 +1310,9 @@ async function maybeTemplate(path, doc) {
         // Convert the UUID links to human-readable links
         markdown = convertMarkdownLinks(markdown, doc);
     }
+
+    // Handle double-escaped entities in template output, e.g. "&amp;#x27;".
+    markdown = decodeHtmlEntities(markdown);
 
     zip.folder(path).file(zipfilename(doc), markdown, { binary: false });
 }
