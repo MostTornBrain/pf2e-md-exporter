@@ -261,8 +261,7 @@ Hooks.once('ready', () => {
           linkName = `[[${item.flags.core.sourceId}|${item.name}]]`;
         }
 
-        const coinLabelHelper = Handlebars.helpers.coinLabel;
-        let value = coinLabelHelper(item.price.value);
+        let value = item.price.value;
         value = value.scale(quantity);
 
         let bulk = item.bulk.value;
