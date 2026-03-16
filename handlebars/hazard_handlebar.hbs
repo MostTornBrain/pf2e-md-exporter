@@ -67,7 +67,7 @@ attacks:
   - name: ""
 {{#each items}}{{#if (eq type "action")}}
   - name: "{{{name}}}"
-    desc: "{{{more-handlebars-helpers-table system.actionType.value "reaction" "`pf2:r`" "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "free" "`pf2:0`"}}}
+    desc: "{{{me-actionIcon system.actionType.value}}}
 {{~#if system.traits.value.length}} ({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}}){{/if}} {{{me-HTMLtoYAML system.description.value system}}}"
 {{/if}}
 {{#if (eq type "melee")}}

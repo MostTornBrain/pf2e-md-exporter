@@ -859,7 +859,6 @@ function setupTurndown() {
         turndownService.use(gfm);
         
         // Add a custom rule for handling action-glyph spans.
-        // Convert them to Obsidian PF2E Action Icons plugin format.
         turndownService.addRule('actionGlyph', {
           filter: function (node, options) {
             return (
@@ -868,28 +867,7 @@ function setupTurndown() {
             );
           },
           replacement: function (content, node, options) {
-            // Match the default format used by the PF2E Action Icons plugin
-            switch (content) {
-             // Free action
-             case 'F':
-             case 'f':
-                content = '0';
-                break;
-                
-             // Reaction
-             case 'R':
-             case 'r':
-                content = 'r';
-                break;
-                
-             // Action - some Foundry entries use 1 (such as most spells), others use 'a'
-             case 'a':
-             case 'A':
-                content = '1';
-                break;
-            }
-            
-            return '`pf2:' + content + '`';
+             return MOD_CONFIG.actionIcon(content, game.settings);
           }
         });
 
@@ -970,7 +948,6 @@ async function convertHtmlAsync(doc, html) {
 // Unfortunately, handlebars don't run asynchronously, so I need a redundant version
 // of the HTML conversion code that is synchronous, which won't handle pulling in the contents of @Embed tags.    
 export function convertHtml(doc, html) {
-
     // console.log("Converting synchronously: ", html);
 
     setupTurndown();
@@ -1362,6 +1339,7 @@ async function onePackFolder(path, folder) {
 }
 
 export async function exportMarkdown(from, zipname) {
+    console.log(from);
 
     clearTemplateCache();
 

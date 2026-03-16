@@ -66,7 +66,7 @@ abilities_top:
 {{~/if}}
 {{#each items}}{{#if (eq system.category "interaction")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+    desc: "{{{me-actionIcon system.actions.value fallback=system.actionType.value}}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}}
 abilities_mid:
   - name: ""
@@ -77,7 +77,7 @@ abilities_mid:
     desc: "{{system.weapons.ranged.name}} +{{add system.weapons.ranged.potency 18}}"
 {{/if}}{{~#each items}}{{#if (eq system.category "defensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) (or system.actions.value (and system.actionType.value (ne system.actionType.value "passive"))))}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+    desc: "{{{me-actionIcon system.actions.value fallback=system.actionType.value}}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}}
 attacks:
   - name: ""
@@ -87,7 +87,7 @@ attacks:
 {{/if}}{{/each~}}
 {{#each items}}{{#if (eq category "army-war-action")}}
   - name: "{{capitalize this.name}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{{me-HTMLtoYAML this.system.description.value}}}"
+    desc: "{{{me-actionIcon system.actions.value fallback=system.actionType.value}}} {{{me-HTMLtoYAML this.system.description.value}}}"
 {{/if}}{{/each~}}
 {{#each items as |item|}}{{#if (eq item.type "spellcastingEntry")}}
   - name: "{{item.name}}"
@@ -101,7 +101,7 @@ attacks:
 {{/if}}
 {{#each items}}{{#if (eq system.category "offensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if (eq system.actionType.value 'reaction')}}`pf2:r`{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+    desc: "{{{me-actionIcon system.actions.value fallback=system.actionType.value}}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}} 
 ```
 
