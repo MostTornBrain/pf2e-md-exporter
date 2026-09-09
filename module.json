@@ -1,13 +1,13 @@
 {
   "id": "pf2e-md-exporter",
+  "type": "module",
   "title": "PF2E Exporter",
   "description": "Exports one or more journals as a ZIP file containing markdown files in a folder tree. This is specifically tuned for working with PF2E formatted data.",
   "version": "#{VERSION}#",
   "library": "false",
   "compatibility": {
-    "minimum": "13.336",
-    "maximum": "13.999",
-    "verified": "13.344"
+    "minimum": "14",
+    "verified": "14"
   },
   "authors": [
     {

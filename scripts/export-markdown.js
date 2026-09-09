@@ -1440,28 +1440,43 @@ function ziprawfilename(name, type) {
     return `${type}-${name}`;
 }
 
+/**
+ * Resolve the document (or compendium) behind a directory entry.
+ * Works for the sidebar tabs and for compendium windows, without
+ * reconstructing a UUID from the element id.
+ */
+async function entryDocument(li) {
+    if (li.dataset.pack) return game.packs.get(li.dataset.pack) ?? null;
+    const section = li.closest("section.directory");
+    const app = foundry.applications.instances.get(section?.id) ?? ui[section?.id];
+    const collection = app?.collection;
+    if (!collection) return null;
+    if (li.classList.contains("folder")) {
+        const folderId = li.dataset.folderId ?? li.dataset.entryId;
+        return collection.folders?.get(folderId) ?? game.folders.get(folderId) ?? null;
+    }
+    const id = li.dataset.entryId;
+    if (!id) return null;
+    if (collection instanceof foundry.documents.collections.CompendiumCollection) return collection.getDocument(id);
+    return collection.get(id) ?? null;
+}
+
 function menuAppend(menuItems) {
     menuItems.push({
-        name: `${MODULE_NAME}.exportToMarkdown`,
+        label: `${MODULE_NAME}.exportToMarkdown`,
         icon: '<i class="fas fa-file-zip"></i>',
-        condition: () => game.user.isGM,
-        callback: async header => {
-            console.log("Exporting to Markdown: ", header);
-            const li = header.closest(".directory-item");
-            const id = li.dataset.entryId;
-            const tabid = header.closest("section.directory").id;
-            if (tabid === "compendium") {
-                const pack = game.packs.get(li.dataset.pack);
-                if (pack) exportMarkdown(pack, ziprawfilename(pack.title, pack.metadata.type));
-            } else {
-                const uuid = tabid.replace("_", ".").replace("compendium-", "Compendium.") + "." + id;
-                const entry = await fromUuid(uuid);
-                if (entry) {
-                    exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
-                } else {
-                    console.log(`Unable to find entry for UUID ${uuid}`);
-                }
+        visible: () => game.user.isGM,
+        onClick: async (event, target) => {
+            const li = target.closest(".directory-item");
+            const entry = await entryDocument(li);
+            if (!entry) {
+                console.log(`${MODULE_NAME} | Unable to find the entry for`, li);
+                return;
             }
+            if (entry instanceof foundry.documents.collections.CompendiumCollection)
+                exportMarkdown(entry, ziprawfilename(entry.title, entry.metadata.type));
+            else
+                exportMarkdown(entry, ziprawfilename(entry.name, entry.constructor.name));
         },
     });
 }
@@ -1514,14 +1529,14 @@ Hooks.on("getContextMenuEntryContext", (html, menuItems) => {
 
 Hooks.on("getFolderContextOptions", (html, menuItems) => {
     menuItems.push({
-        name: `${MODULE_NAME}.exportToMarkdown`,
+        label: `${MODULE_NAME}.exportToMarkdown`,
         icon: '<i class="fas fa-file-zip"></i>',
-        condition: () => game.user.isGM,
-        callback: async header => {
-            const folder = await fromUuid(header.closest(".directory-item").dataset.uuid);
+        visible: () => game.user.isGM,
+        onClick: async (event, target) => {
+            const folder = await entryDocument(target.closest(".directory-item"));
             if (folder) exportMarkdown(folder, ziprawfilename(folder.name, folder.type));
         },
-    });  
+    });
 })
 
 /* Hook for adding the "Export to Markdown" button to the bottom of the sidebar for each tab */
